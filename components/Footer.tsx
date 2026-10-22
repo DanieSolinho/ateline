@@ -1,4 +1,5 @@
 import Image from "next/image";
+import logo from "@/public/logo-ateline.png";
 import Link from "next/link";
 
 const ajuda = [
@@ -13,7 +14,7 @@ export function Footer() {
     <footer className="border-t border-linha bg-blush">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 py-12 md:grid-cols-3">
         <div className="flex flex-col gap-3">
-          <Image src="/logo-ateline.png" alt="Ateline" width={90} height={72} />
+          <Image src={logo} alt="Ateline" width={90} height={72} />
           <p className="text-sm text-ameixa-suave">
             Rua Cândido Benício, 2967, bloco P, loja G
             <br />

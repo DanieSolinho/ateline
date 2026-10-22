@@ -1,4 +1,5 @@
 import Image from "next/image";
+import logo from "@/public/logo-ateline.png";
 import Link from "next/link";
 import { ShoppingBag, UserRound } from "lucide-react";
 
@@ -19,7 +20,7 @@ export function Header() {
 
       <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3">
         <Link href="/" aria-label="Ateline, página inicial">
-          <Image src="/logo-ateline.png" alt="Ateline" width={80} height={64} priority />
+          <Image src={logo} alt="Ateline" width={80} height={64} priority />
         </Link>
 
         {/* No celular o menu desce para a linha de baixo; no computador fica ao lado da logo */}
