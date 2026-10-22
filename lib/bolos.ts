@@ -15,3 +15,7 @@ export async function getBolo(codigo: string): Promise<Bolo | undefined> {
 export async function getDestaques(): Promise<Bolo[]> {
   return bolos.filter((bolo) => bolo.destaque);
 }
+
+export async function getBolosParaAlugar(): Promise<Bolo[]> {
+  return bolos.filter((bolo) => bolo.modalidade !== "venda");
+}
