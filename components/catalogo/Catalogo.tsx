@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CardBolo } from "@/components/CardBolo";
@@ -40,27 +40,23 @@ export function Catalogo({ bolos, reservas }: { bolos: Bolo[]; reservas: Reserva
   const [busca, setBusca] = useState("");
   const [somenteLivres, setSomenteLivres] = useState(true);
 
-  // Para cada bolo: livre (true) ou reservado (false). Sem data, fica null.
-  const disponibilidade = useMemo(() => {
-    if (!dataFesta) return null;
-    const mapa = new Map<string, boolean>();
+    // Para cada bolo: livre (true) ou reservado (false). Sem data, fica null.
+  let disponibilidade: Map<string, boolean> | null = null;
+  if (dataFesta) {
+    disponibilidade = new Map();
     for (const bolo of bolos) {
-      mapa.set(bolo.codigo, estaDisponivel(bolo.codigo, dataFesta, reservas));
+      disponibilidade.set(bolo.codigo, estaDisponivel(bolo.codigo, dataFesta, reservas));
     }
-    return mapa;
-  }, [bolos, reservas, dataFesta]);
+  }
 
-  // Só refaz o filtro quando algum desses valores muda
-  const filtrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    return bolos.filter((bolo) => {
-      if (tipo !== "todos" && bolo.tipo !== tipo) return false;
-      const texto = `${bolo.nome} ${bolo.tema} ${bolo.codigo}`.toLowerCase();
-      if (termo && !texto.includes(termo)) return false;
-      if (somenteLivres && disponibilidade && !disponibilidade.get(bolo.codigo)) return false;
-      return true;
-    });
-  }, [bolos, tipo, busca, somenteLivres, disponibilidade]);
+  const termo = busca.trim().toLowerCase();
+  const filtrados = bolos.filter((bolo) => {
+    if (tipo !== "todos" && bolo.tipo !== tipo) return false;
+    const texto = `${bolo.nome} ${bolo.tema} ${bolo.codigo}`.toLowerCase();
+    if (termo && !texto.includes(termo)) return false;
+    if (somenteLivres && disponibilidade && !disponibilidade.get(bolo.codigo)) return false;
+    return true;
+  });
 
   return (
     <div className="mt-6 flex flex-col gap-8">
