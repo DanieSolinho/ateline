@@ -1,7 +1,8 @@
 import Image from "next/image";
 import logo from "@/public/logo-ateline.png";
 import Link from "next/link";
-import { ShoppingBag, UserRound } from "lucide-react";
+import { UserRound } from "lucide-react";
+import { BotaoCarrinho } from "@/components/BotaoCarrinho";
 
 const links = [
   { href: "/alugar", label: "Bolos para alugar" },
@@ -43,13 +44,7 @@ export function Header() {
           >
             <UserRound size={22} strokeWidth={1.8} />
           </Link>
-          <Link
-            href="/carrinho"
-            aria-label="Carrinho"
-            className="grid size-11 place-items-center rounded-full hover:bg-blush"
-          >
-            <ShoppingBag size={22} strokeWidth={1.8} />
-          </Link>
+          <BotaoCarrinho />
         </div>
       </div>
     </header>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useCarrinho } from "@/hooks/useCarrinho";
 import {
   diaPorExtenso,
   diasDoMes,
@@ -38,6 +39,8 @@ export function CalendarioReserva({ bolo, reservas }: Props) {
   const hoje = useSyncExternalStore(naoMuda, hojeIso, hojeNoServidor);
   const [mesEscolhido, setMesEscolhido] = useState<{ ano: number; mes: number } | null>(null);
   const [festa, setFesta] = useState<string | null>(null);
+  const { adicionar } = useCarrinho();
+  const router = useRouter();
 
   if (!hoje) {
     return <p className="rounded-2xl border border-linha p-5 text-ameixa-suave">Carregando calendário…</p>;
@@ -56,6 +59,12 @@ export function CalendarioReserva({ bolo, reservas }: Props) {
   const locacao = bolo.precoLocacao ?? 0;
   const sinal = locacao * PERCENTUAL_SINAL;
   const naRetirada = locacao - sinal + TAXA_SEGURANCA;
+
+  function reservar() {
+    if (!festa) return;
+    adicionar({ codigo: bolo.codigo, nome: bolo.nome, precoLocacao: locacao, festa });
+    router.push("/carrinho");
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -160,12 +169,13 @@ export function CalendarioReserva({ bolo, reservas }: Props) {
             <span>Na retirada: restante + taxa de segurança</span>
             <strong>{formatarPreco(naRetirada)}</strong>
           </p>
-          <Link
-            href={`/carrinho?bolo=${bolo.codigo}&data=${festa}`}
-            className="mt-2 grid h-14 place-items-center rounded-xl bg-framboesa text-lg font-bold text-white hover:bg-framboesa-escura"
+          <button
+            type="button"
+            onClick={reservar}
+            className="mt-2 h-14 rounded-xl bg-framboesa text-lg font-bold text-white hover:bg-framboesa-escura"
           >
             Reservar e pagar sinal de {formatarPreco(sinal)}
-          </Link>
+          </button>
         </section>
       ) : (
         <p className="rounded-2xl bg-blush p-5 text-ameixa-suave">
