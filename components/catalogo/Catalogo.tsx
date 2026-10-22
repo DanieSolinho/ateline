@@ -4,7 +4,9 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CardBolo } from "@/components/CardBolo";
+import { calcularPeriodo, estaDisponivel } from "@/lib/periodo";
 import type { Bolo, TipoBolo } from "@/types/bolo";
+import type { Reserva } from "@/types/reserva";
 
 type FiltroTipo = TipoBolo | "todos";
 
@@ -21,33 +23,67 @@ function formatarData(iso: string) {
   return `${dia}/${mes}/${ano}`;
 }
 
-export function Catalogo({ bolos }: { bolos: Bolo[] }) {
+// "2026-10-24" → "24/10"
+function diaMes(iso: string) {
+  const [, mes, dia] = iso.split("-");
+  return `${dia}/${mes}`;
+}
+
+export function Catalogo({ bolos, reservas }: { bolos: Bolo[]; reservas: Reserva[] }) {
   const searchParams = useSearchParams();
-  const dataFesta = searchParams.get("data"); // "2026-10-25" ou null
+  const dataNaUrl = searchParams.get("data");
+  // Só aceita datas no formato certo, para ninguém quebrar a página editando o endereço
+  const dataFesta = dataNaUrl && /^\d{4}-\d{2}-\d{2}$/.test(dataNaUrl) ? dataNaUrl : null;
+  const periodo = dataFesta ? calcularPeriodo(dataFesta) : null;
 
   const [tipo, setTipo] = useState<FiltroTipo>("todos");
   const [busca, setBusca] = useState("");
+  const [somenteLivres, setSomenteLivres] = useState(true);
 
-  // Só refaz o filtro quando a lista, o tipo ou a busca mudam
+  // Para cada bolo: livre (true) ou reservado (false). Sem data, fica null.
+  const disponibilidade = useMemo(() => {
+    if (!dataFesta) return null;
+    const mapa = new Map<string, boolean>();
+    for (const bolo of bolos) {
+      mapa.set(bolo.codigo, estaDisponivel(bolo.codigo, dataFesta, reservas));
+    }
+    return mapa;
+  }, [bolos, reservas, dataFesta]);
+
+  // Só refaz o filtro quando algum desses valores muda
   const filtrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
     return bolos.filter((bolo) => {
       if (tipo !== "todos" && bolo.tipo !== tipo) return false;
       const texto = `${bolo.nome} ${bolo.tema} ${bolo.codigo}`.toLowerCase();
       if (termo && !texto.includes(termo)) return false;
+      if (somenteLivres && disponibilidade && !disponibilidade.get(bolo.codigo)) return false;
       return true;
     });
-  }, [bolos, tipo, busca]);
+  }, [bolos, tipo, busca, somenteLivres, disponibilidade]);
 
   return (
     <div className="mt-6 flex flex-col gap-8">
-      {dataFesta ? (
-        <p className="rounded-xl bg-blush px-4 py-3">
-          Festa em <strong>{formatarData(dataFesta)}</strong>.{" "}
-          <Link href="/" className="font-bold text-framboesa hover:underline">
-            Trocar data
-          </Link>
-        </p>
+      {dataFesta && periodo ? (
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-xl bg-blush px-4 py-3">
+          <p>
+            Festa em <strong>{formatarData(dataFesta)}</strong> · retirada{" "}
+            <strong>{diaMes(periodo.retirada)}</strong> · devolução{" "}
+            <strong>{diaMes(periodo.devolucao)}</strong>.{" "}
+            <Link href="/" className="font-bold text-framboesa hover:underline">
+              Trocar data
+            </Link>
+          </p>
+          <label className="flex items-center gap-2 font-semibold">
+            <input
+              type="checkbox"
+              checked={somenteLivres}
+              onChange={(evento) => setSomenteLivres(evento.target.checked)}
+              className="size-5 accent-folha"
+            />
+            Só livres nessa data
+          </label>
+        </div>
       ) : (
         <p className="rounded-xl bg-blush px-4 py-3">
           <Link href="/" className="font-bold text-framboesa hover:underline">
@@ -101,7 +137,11 @@ export function Catalogo({ bolos }: { bolos: Bolo[] }) {
       {filtrados.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
           {filtrados.map((bolo) => (
-            <CardBolo key={bolo.codigo} bolo={bolo} />
+            <CardBolo
+              key={bolo.codigo}
+              bolo={bolo}
+              disponivel={disponibilidade?.get(bolo.codigo)}
+            />
           ))}
         </div>
       ) : (
