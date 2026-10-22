@@ -1,38 +1,34 @@
-import Image from "next/image";
+import { CardBolo } from "@/components/CardBolo";
+import type { Bolo } from "@/types/bolo";
 
-const amostras = [
-  { nome: "framboesa", classe: "bg-framboesa" },
-  { nome: "ameixa", classe: "bg-ameixa" },
-  { nome: "blush", classe: "bg-blush" },
-  { nome: "rosa", classe: "bg-rosa" },
-  { nome: "pêssego", classe: "bg-pessego" },
-  { nome: "folha", classe: "bg-folha" },
+// Dados de exemplo: só o Bolo Tiana é real. Os outros saem quando a planilha chegar.
+const exemplos: { bolo: Bolo; disponivel?: boolean }[] = [
+  {
+    bolo: { codigo: "0211", nome: "Bolo Tiana", tipo: "bolo", modalidade: "aluguel", tema: "princesas", andares: 1, precoLocacao: 70 },
+    disponivel: true,
+  },
+  {
+    bolo: { codigo: "0001", nome: "Exemplo reservado", tipo: "bolo", modalidade: "aluguel", tema: "safari", andares: 2, precoLocacao: 90 },
+    disponivel: false,
+  },
+  {
+    bolo: { codigo: "0002", nome: "Exemplo de kit", tipo: "kit_completo", modalidade: "aluguel", tema: "floral", andares: 1, precoLocacao: 250, itensKit: ["mesa", "bandejas", "painel", "arcos"] },
+    disponivel: true,
+  },
+  {
+    bolo: { codigo: "0003", nome: "Exemplo à venda", tipo: "bolo", modalidade: "venda", tema: "futebol", andares: 1, precoVenda: 380 },
+  },
 ];
 
 export default function Home() {
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-6 py-16">
-      <Image src="/logo-ateline.png" alt="Ateline" width={160} height={128} priority />
-
-      <h1 className="font-display text-4xl font-bold">
-        O bolo dos sonhos da sua festa
-      </h1>
-      <p className="text-lg text-ameixa-suave">
-        Teste do tema: se esta frase está em Nunito Sans e o título em Outfit, deu certo.
-      </p>
-
-      <div className="flex flex-wrap gap-3">
-        {amostras.map((cor) => (
-          <div key={cor.nome} className="flex flex-col items-center gap-1 text-sm">
-            <span className={`h-14 w-14 rounded-xl border border-linha ${cor.classe}`} />
-            {cor.nome}
-          </div>
+    <main className="mx-auto w-full max-w-7xl px-4 py-12">
+      <h1 className="mb-8 font-display text-3xl font-semibold">Teste do CardBolo</h1>
+      <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
+        {exemplos.map(({ bolo, disponivel }) => (
+          <CardBolo key={bolo.codigo} bolo={bolo} disponivel={disponivel} />
         ))}
       </div>
-
-      <button className="h-12 self-start rounded-xl bg-framboesa px-6 font-bold text-white hover:bg-framboesa-escura">
-        Ver bolos disponíveis
-      </button>
     </main>
   );
 }
