@@ -12,4 +12,5 @@ export type Bolo = {
   precoVenda?: number;
   foto?: string;
   itensKit?: string[];
+  destaque?: boolean;      // aparece em "Queridinhos" na home
 };
