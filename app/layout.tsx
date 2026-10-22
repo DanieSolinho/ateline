@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 
 const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
 const nunito = Nunito_Sans({ variable: "--font-nunito", subsets: ["latin"] });
@@ -18,10 +19,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className={`${outfit.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+    <body className="min-h-full flex flex-col font-sans">
       <Header />
-      {children}
-</body>
+      <div className="flex-1">{children}</div>
+      <Footer />
+    </body>
     </html>
   );
 }
