@@ -7,10 +7,10 @@ import { linkWhatsApp } from "@/lib/contato";
 import {
   criarEsquemaEncomenda,
   cupomValido,
-  dataMinimaParaRefazer,
+  antecedenciaEmDias,
+  dataMinimaDaFesta,
   mensagemDeEncomenda,
   precoComCupom,
-  somarDias,
   type BoloParaRefazer,
   type CampoEncomenda,
 } from "@/lib/encomenda";
@@ -52,7 +52,7 @@ export function FormularioEncomenda({ refaziveis, cupom }: Props) {
         }
       : null;
 
-  const dataMinima = hoje ? (refazer ? dataMinimaParaRefazer(hoje) : somarDias(hoje, 1)) : undefined;
+  const dataMinima = hoje ? dataMinimaDaFesta(hoje, refazer !== null) : undefined;
   const valor = refazer ? precoComCupom(refazer.preco, cupomDigitado, cupom) : null;
 
   function escolherParaRefazer(codigo: string) {
@@ -249,7 +249,10 @@ export function FormularioEncomenda({ refaziveis, cupom }: Props) {
           <div className="grid gap-4 sm:grid-cols-2">
             <Campo nome="festa" rotulo="Data da festa" erro={erros.festa}>
               <input id="festa" name="festa" type="date" min={dataMinima} aria-invalid={!!erros.festa}
-                aria-describedby="festa-erro" className={estiloCampo} />
+                aria-describedby="festa-erro festa-dica" className={estiloCampo} />
+              <p id="festa-dica" className="text-sm text-ameixa-suave">
+                Precisamos de {antecedenciaEmDias(refazer !== null)} dias para fazer o bolo.
+              </p>
             </Campo>
             {!refazer && (
               <Campo nome="tema" rotulo="Tema" erro={erros.tema}>

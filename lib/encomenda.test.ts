@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   criarEsquemaEncomenda,
-  dataMinimaParaRefazer,
+  dataMinimaDaFesta,
   mensagemDeEncomenda,
   precoComCupom,
   somarDias,
@@ -28,8 +28,9 @@ describe("datas", () => {
     expect(somarDias("2026-10-23", 10)).toBe("2026-11-02");
   });
 
-  it("refazer pede 20 dias de antecedência", () => {
-    expect(dataMinimaParaRefazer("2026-10-23")).toBe("2026-11-12");
+  it("refazer e bolo novo pedem 20 dias de antecedência", () => {
+    expect(dataMinimaDaFesta("2026-10-23", true)).toBe("2026-11-12");
+    expect(dataMinimaDaFesta("2026-10-23", false)).toBe("2026-11-12");
   });
 });
 
@@ -49,6 +50,13 @@ describe("criarEsquemaEncomenda", () => {
     const esquema = criarEsquemaEncomenda("2026-10-23", jardim);
     expect(esquema.safeParse({ ...formulario, festa: "2026-11-11" }).success).toBe(false);
     expect(esquema.safeParse({ ...formulario, festa: "2026-11-12" }).success).toBe(true);
+  });
+
+  it("no bolo novo, também recusa festa com menos de 20 dias", () => {
+    const esquema = criarEsquemaEncomenda("2026-10-23", null);
+    const novo = { ...formulario, tema: "Jardim" };
+    expect(esquema.safeParse({ ...novo, festa: "2026-11-11" }).success).toBe(false);
+    expect(esquema.safeParse({ ...novo, festa: "2026-11-12" }).success).toBe(true);
   });
 
   it("no bolo novo, o tema é obrigatório", () => {

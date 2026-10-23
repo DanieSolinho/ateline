@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { formatarPreco } from "@/lib/formatar";
-import { ANTECEDENCIA_REFAZER_DIAS } from "@/lib/regras";
+import { ANTECEDENCIA_BOLO_NOVO_DIAS, ANTECEDENCIA_REFAZER_DIAS } from "@/lib/regras";
 import { somenteDigitos, telefoneValido } from "@/lib/validacao";
 import type { Cupom } from "@/types/catalogo";
 
@@ -11,9 +11,13 @@ export function somarDias(iso: string, dias: number): string {
   return data.toISOString().slice(0, 10);
 }
 
-// Primeira data de festa possível para refazer um bolo do acervo
-export function dataMinimaParaRefazer(hoje: string): string {
-  return somarDias(hoje, ANTECEDENCIA_REFAZER_DIAS);
+// Primeira data de festa possível: refazer um bolo do acervo ou fazer um bolo novo
+export function antecedenciaEmDias(refazer: boolean): number {
+  return refazer ? ANTECEDENCIA_REFAZER_DIAS : ANTECEDENCIA_BOLO_NOVO_DIAS;
+}
+
+export function dataMinimaDaFesta(hoje: string, refazer: boolean): string {
+  return somarDias(hoje, antecedenciaEmDias(refazer));
 }
 
 // O cupom vale se o código bater (sem ligar para maiúsculas e espaços)
@@ -38,7 +42,8 @@ export type BoloParaRefazer = {
 
 // As regras do formulário. A data mínima depende de "hoje" e de ser refazer ou bolo novo.
 export function criarEsquemaEncomenda(hoje: string, refazer: BoloParaRefazer | null) {
-  const minima = refazer ? dataMinimaParaRefazer(hoje) : somarDias(hoje, 1);
+  const minima = dataMinimaDaFesta(hoje, refazer !== null);
+  const dias = antecedenciaEmDias(refazer !== null);
   return z
     .object({
       finalidade: z.enum(["alugar", "comprar"], { error: "Escolha alugar ou comprar." }),
@@ -46,9 +51,7 @@ export function criarEsquemaEncomenda(hoje: string, refazer: BoloParaRefazer | n
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, { error: "Escolha a data da festa." })
         .refine((data) => data >= minima, {
-          error: refazer
-            ? `Para refazer um bolo, precisamos de ${ANTECEDENCIA_REFAZER_DIAS} dias. Escolha uma data a partir de ${minima.split("-").reverse().join("/")}.`
-            : "Escolha uma data futura.",
+          error: `Precisamos de ${dias} dias para fazer o bolo. Escolha uma data a partir de ${minima.split("-").reverse().join("/")}.`,
         }),
       tema: refazer ? z.string().trim() : z.string().trim().min(2, { error: "Conte o tema da festa." }),
       cores: z.string().trim(),
