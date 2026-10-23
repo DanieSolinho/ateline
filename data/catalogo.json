@@ -1,0 +1,127 @@
+{
+  "bolos": [
+    {
+      "codigo": "SAFARI_001",
+      "nome": "Safari",
+      "tema": "Safari",
+      "andaresMin": 3,
+      "andaresMax": 5,
+      "tipoTopo": "fixo",
+      "toposCompativeis": [],
+      "aceitaBaseDourada": true,
+      "personalizacao": "nome_idade",
+      "status": "disponivel",
+      "previsaoVolta": null,
+      "podeSerRefeito": false
+    },
+    {
+      "codigo": "JARDIM_001",
+      "nome": "Jardim encantado",
+      "tema": "Jardim",
+      "andaresMin": 3,
+      "andaresMax": 4,
+      "tipoTopo": "opcional",
+      "toposCompativeis": [
+        "TOPO_001",
+        "TOPO_003"
+      ],
+      "aceitaBaseDourada": true,
+      "personalizacao": "nome",
+      "status": "manutencao",
+      "previsaoVolta": "2026-10-28",
+      "podeSerRefeito": false
+    }
+  ],
+  "opcoes": [
+    {
+      "codigo": "SAFARI_001_3A",
+      "codigoBolo": "SAFARI_001",
+      "decoracao": null,
+      "andares": 3,
+      "precoLocacao": 150,
+      "precoVenda": null,
+      "precoEncomendaNova": null
+    },
+    {
+      "codigo": "SAFARI_001_4A",
+      "codigoBolo": "SAFARI_001",
+      "decoracao": null,
+      "andares": 4,
+      "precoLocacao": 180,
+      "precoVenda": null,
+      "precoEncomendaNova": null
+    },
+    {
+      "codigo": "SAFARI_001_5A",
+      "codigoBolo": "SAFARI_001",
+      "decoracao": null,
+      "andares": 5,
+      "precoLocacao": 210,
+      "precoVenda": null,
+      "precoEncomendaNova": null
+    },
+    {
+      "codigo": "JARDIM_001_FLORES_3A",
+      "codigoBolo": "JARDIM_001",
+      "decoracao": "Flores",
+      "andares": 3,
+      "precoLocacao": 140,
+      "precoVenda": null,
+      "precoEncomendaNova": null
+    },
+    {
+      "codigo": "JARDIM_001_BORBOLETAS_3A",
+      "codigoBolo": "JARDIM_001",
+      "decoracao": "Borboletas",
+      "andares": 3,
+      "precoLocacao": 140,
+      "precoVenda": null,
+      "precoEncomendaNova": null
+    },
+    {
+      "codigo": "JARDIM_001_BORBOLETAS_4A",
+      "codigoBolo": "JARDIM_001",
+      "decoracao": "Borboletas",
+      "andares": 4,
+      "precoLocacao": 170,
+      "precoVenda": null,
+      "precoEncomendaNova": null
+    }
+  ],
+  "topos": [
+    {
+      "codigo": "TOPO_001",
+      "nome": "Coroa dourada",
+      "descricao": "Coroa com brilho dourado",
+      "precoLocacao": 30,
+      "status": "disponivel",
+      "previsaoVolta": null
+    },
+    {
+      "codigo": "TOPO_003",
+      "nome": "Laço rosa",
+      "descricao": "Laço de cetim rosa",
+      "precoLocacao": 25,
+      "status": "alugado",
+      "previsaoVolta": "2026-10-25"
+    }
+  ],
+  "bases": [
+    {
+      "codigo": "BASE_DOURADA_001",
+      "nome": "Base dourada",
+      "descricao": "Andar avulso dourado; entra como base para deixar o bolo maior",
+      "precoLocacao": 40,
+      "status": "disponivel",
+      "previsaoVolta": null
+    },
+    {
+      "codigo": "BASE_DOURADA_002",
+      "nome": "Base dourada",
+      "descricao": "Andar avulso dourado; entra como base para deixar o bolo maior",
+      "precoLocacao": 40,
+      "status": "disponivel",
+      "previsaoVolta": null
+    }
+  ]
+}
