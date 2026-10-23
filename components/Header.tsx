@@ -1,34 +1,29 @@
 import Image from "next/image";
-import logo from "@/public/logo-ateline.png";
 import Link from "next/link";
 import { UserRound } from "lucide-react";
 import { BotaoCarrinho } from "@/components/BotaoCarrinho";
-
-const links = [
-  { href: "/alugar", label: "Bolos para alugar" },
-  { href: "/encomenda", label: "Encomende o seu" },
-  { href: "/comprar", label: "Comprar" },
-];
+import { MenuCelular } from "@/components/MenuCelular";
+import { LINKS_DO_MENU } from "@/lib/navegacao";
+import logo from "@/public/logo-ateline.png";
 
 export function Header() {
   return (
-    <header className="border-b border-linha">
+    <header className="relative border-b border-linha">
       {/* Faixa de aviso no topo */}
       <p className="bg-ameixa px-4 py-2 text-center text-sm text-blush">
         Aluguel com retirada na Praça Seca (RJ) · Venda com envio para todo o Brasil
       </p>
 
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-8 gap-y-2 px-4 py-3">
+      <div className="mx-auto flex max-w-7xl items-center gap-x-8 px-4 py-3">
+        <MenuCelular />
+
         <Link href="/" aria-label="Ateline, página inicial">
           <Image src={logo} alt="Ateline" width={80} height={64} priority />
         </Link>
 
-        {/* No celular o menu desce para a linha de baixo; no computador fica ao lado da logo */}
-        <nav
-          aria-label="Principal"
-          className="order-last flex w-full flex-wrap gap-x-6 text-[15px] font-semibold md:order-none md:w-auto md:flex-1"
-        >
-          {links.map((link) => (
+        {/* No computador o menu fica ao lado da logo; no celular ele abre pelo botão ☰ */}
+        <nav aria-label="Principal" className="hidden flex-1 gap-x-6 text-[15px] font-semibold md:flex">
+          {LINKS_DO_MENU.map((link) => (
             <Link key={link.href} href={link.href} className="py-2 hover:text-framboesa">
               {link.label}
             </Link>
@@ -39,7 +34,7 @@ export function Header() {
           <Link
             href="/conta"
             aria-label="Minha conta"
-            className="grid size-11 place-items-center rounded-full hover:bg-blush"
+            className="hidden size-11 place-items-center rounded-full hover:bg-blush md:grid"
           >
             <UserRound size={22} strokeWidth={1.8} />
           </Link>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import { Header } from "@/components/Header";
+import { BotaoWhatsApp } from "@/components/BotaoWhatsApp";
 import { Footer } from "@/components/Footer";
 
 const outfit = Outfit({ variable: "--font-outfit", subsets: ["latin"] });
@@ -23,6 +24,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <Header />
       <div className="flex-1">{children}</div>
       <Footer />
+      <BotaoWhatsApp />
     </body>
     </html>
   );

@@ -12,8 +12,8 @@ export function Hero() {
             O bolo dos sonhos da sua festa, sem se preocupar com a mesa
           </h1>
           <p className="max-w-lg text-lg text-ameixa-suave">
-            Alugue um bolo do nosso acervo, monte a mesa com um kit pegue e monte ou
-            encomende um bolo feito do seu jeito.
+            Alugue um bolo do nosso acervo, compre o seu para sempre ou encomende um
+            bolo feito do seu jeito.
           </p>
 
           {/* Ao enviar, vai para /alugar?data=2026-10-25 */}
