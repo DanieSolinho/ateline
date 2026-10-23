@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Catalogo } from "@/components/catalogo/Catalogo";
-import { getBolos } from "@/lib/bolos";
+import { getVitrine } from "@/lib/catalogo";
 import { getReservas } from "@/lib/reservas";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AlugarPage() {
-  const [bolos, reservas] = await Promise.all([getBolos(), getReservas()]);
+  const [bolos, reservas] = await Promise.all([getVitrine(), getReservas()]);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-10">

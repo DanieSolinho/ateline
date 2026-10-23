@@ -1,28 +1,22 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Check, CircleSlash } from "lucide-react";
-import type { Bolo, TipoBolo } from "@/types/bolo";
 import { formatarPreco } from "@/lib/formatar";
+import type { BoloVitrine } from "@/types/catalogo";
 
 type CardBoloProps = {
-  bolo: Bolo;
+  bolo: BoloVitrine;
+  foto?: string;
   // true = livre na data escolhida · false = reservado · sem valor = nenhuma data escolhida
   disponivel?: boolean;
 };
 
-const nomeDoTipo: Record<TipoBolo, string> = {
-  bolo: "Bolo",
-  mini_kit: "Mini kit",
-  kit_completo: "Kit completo",
-};
-
-export function CardBolo({ bolo, disponivel }: CardBoloProps) {
+export function CardBolo({ bolo, foto, disponivel }: CardBoloProps) {
   const reservado = disponivel === false;
-
-  const detalhe =
-    bolo.tipo === "bolo"
-      ? `${bolo.andares} ${bolo.andares === 1 ? "andar" : "andares"}`
-      : bolo.itensKit?.join(", ");
+  const tamanhos =
+    bolo.andaresMin === bolo.andaresMax
+      ? `${bolo.andaresMin} andares`
+      : `${bolo.andaresMin} a ${bolo.andaresMax} andares`;
 
   return (
     <article className="flex flex-col gap-3">
@@ -31,40 +25,32 @@ export function CardBolo({ bolo, disponivel }: CardBoloProps) {
           reservado ? "opacity-60 grayscale" : ""
         }`}
       >
-        {bolo.foto ? (
-          <Image
-            src={bolo.foto}
-            alt={bolo.nome}
-            fill
-            sizes="(min-width: 768px) 25vw, 50vw"
-            className="object-cover"
-          />
+        {foto ? (
+          <Image src={foto} alt={bolo.nome} fill sizes="(min-width: 768px) 25vw, 50vw" className="object-cover" />
         ) : (
-          <span className="grid h-full place-items-center text-sm text-ameixa-suave">
-            Foto em breve
-          </span>
+          <span className="grid h-full place-items-center text-sm text-ameixa-suave">Foto em breve</span>
         )}
-        <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold">
-          {nomeDoTipo[bolo.tipo]}
-        </span>
+        <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold">{bolo.tema}</span>
       </div>
 
       <div className="flex flex-col gap-1">
         <h3 className="font-display text-lg font-semibold">{bolo.nome}</h3>
         <p className="text-sm text-ameixa-suave">
-          Ref. {bolo.codigo}
-          {detalhe && ` · ${detalhe}`}
+          {tamanhos}
+          {bolo.decoracoes.length > 0 && ` · ${bolo.decoracoes.join(", ")}`}
         </p>
 
         <dl className="mt-1 flex flex-col gap-0.5">
           <div className="flex items-baseline justify-between gap-2">
-            <dt className="text-sm text-ameixa-suave">Aluguel</dt>
-            <dd className="font-bold">{formatarPreco(bolo.precoLocacao)}</dd>
+            <dt className="text-sm text-ameixa-suave">Aluguel a partir de</dt>
+            <dd className="font-bold">{formatarPreco(bolo.menorPrecoLocacao)}</dd>
           </div>
-          <div className="flex items-baseline justify-between gap-2">
-            <dt className="text-sm text-ameixa-suave">Compra</dt>
-            <dd className="font-bold">{formatarPreco(bolo.precoVenda)}</dd>
-          </div>
+          {bolo.menorPrecoVenda !== null && (
+            <div className="flex items-baseline justify-between gap-2">
+              <dt className="text-sm text-ameixa-suave">Compra a partir de</dt>
+              <dd className="font-bold">{formatarPreco(bolo.menorPrecoVenda)}</dd>
+            </div>
+          )}
         </dl>
 
         {disponivel === true && (
@@ -87,7 +73,7 @@ export function CardBolo({ bolo, disponivel }: CardBoloProps) {
             : "bg-framboesa text-white hover:bg-framboesa-escura"
         }`}
       >
-        {reservado ? "Ver datas livres" : "Alugar ou comprar"}
+        {reservado ? "Ver datas livres" : "Escolher tamanho e data"}
       </Link>
     </article>
   );

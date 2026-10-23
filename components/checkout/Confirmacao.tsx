@@ -42,8 +42,9 @@ export function Confirmacao() {
         {pedido.itens.map((item) => {
           const periodo = calcularPeriodo(item.festa);
           return (
-            <li key={`${item.codigo}-${item.festa}`} className="rounded-2xl border border-linha p-4">
+            <li key={`${item.codigoBolo}-${item.festa}`} className="rounded-2xl border border-linha p-4">
               <p className="font-display text-lg font-semibold">{item.nome}</p>
+              {item.personalizacao && <p className="text-sm text-ameixa-suave">{item.personalizacao}</p>}
               <p className="text-sm">
                 <strong>Retirada:</strong> {dia(periodo.retirada)} · <strong>Festa:</strong> {dia(item.festa)} ·{" "}
                 <strong>Devolução:</strong> {dia(periodo.devolucao)}

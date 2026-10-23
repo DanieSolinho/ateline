@@ -3,7 +3,7 @@ import { CardBolo } from "@/components/CardBolo";
 import { Caminhos } from "@/components/home/Caminhos";
 import { ComoFunciona } from "@/components/home/ComoFunciona";
 import { Hero } from "@/components/home/Hero";
-import { getDestaques } from "@/lib/bolos";
+import { getDestaques } from "@/lib/catalogo";
 
 export default async function Home() {
   const destaques = await getDestaques();

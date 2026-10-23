@@ -47,3 +47,10 @@ export type Catalogo = {
   topos: Acessorio[];
   bases: Acessorio[];
 };
+// Um bolo pronto para a vitrine do site: o bolo + as opções dele + os menores preços
+export type BoloVitrine = BoloCatalogo & {
+  opcoes: OpcaoAluguel[];
+  menorPrecoLocacao: number;
+  menorPrecoVenda: number | null;
+  decoracoes: string[];
+};

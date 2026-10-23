@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcularPeriodo, estaDisponivel, periodosSeSobrepoem } from "./periodo";
+import { calcularPeriodo, estaDisponivel, periodosSeSobrepoem, primeiraUnidadeLivre } from "./periodo";
 
 describe("calcularPeriodo", () => {
   it("festa no sábado: retira na sexta e devolve na terça", () => {
@@ -66,5 +66,19 @@ describe("estaDisponivel", () => {
 
   it("libera outro bolo na mesma data", () => {
     expect(estaDisponivel("9001", "2026-10-25", reservas)).toBe(true);
+  });
+});
+
+describe("primeiraUnidadeLivre", () => {
+  const bases = ["BASE_DOURADA_001", "BASE_DOURADA_002"];
+
+  it("pula a unidade reservada e devolve a próxima", () => {
+    const reservas = [{ codigo: "BASE_DOURADA_001", festa: "2026-11-07" }];
+    expect(primeiraUnidadeLivre(bases, "2026-11-07", reservas)).toBe("BASE_DOURADA_002");
+  });
+
+  it("devolve null quando todas estão reservadas", () => {
+    const reservas = bases.map((codigo) => ({ codigo, festa: "2026-11-07" }));
+    expect(primeiraUnidadeLivre(bases, "2026-11-07", reservas)).toBeNull();
   });
 });

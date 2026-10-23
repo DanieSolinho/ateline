@@ -6,7 +6,6 @@ import { BotaoCarrinho } from "@/components/BotaoCarrinho";
 
 const links = [
   { href: "/alugar", label: "Bolos para alugar" },
-  { href: "/kits", label: "Kits pegue e monte" },
   { href: "/encomenda", label: "Encomende o seu" },
   { href: "/comprar", label: "Comprar" },
 ];

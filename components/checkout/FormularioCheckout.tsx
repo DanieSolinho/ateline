@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCarrinho } from "@/hooks/useCarrinho";
 import { salvarUltimoPedido } from "@/hooks/useUltimoPedido";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
-import { resumoDoCarrinho } from "@/lib/carrinho";
+import { resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { esquemaCheckout, type CampoCheckout } from "@/lib/checkout";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
@@ -144,9 +144,12 @@ export function FormularioCheckout() {
             {itens.map((item) => {
               const periodo = calcularPeriodo(item.festa);
               return (
-                <p key={`${item.codigo}-${item.festa}`}>
-                  <strong>{item.nome} (Ref. {item.codigo})</strong>: retirada {dia(periodo.retirada)}, devolução{" "}
-                  {dia(periodo.devolucao)}. Locação de {formatarPreco(item.precoLocacao)}.
+                <p key={`${item.codigoBolo}-${item.festa}`}>
+                  <strong>{item.nome} (Ref. {item.codigoOpcao})</strong>
+                  {item.topo && ` + topo ${item.topo.nome}`}
+                  {item.base && ` + base dourada (${item.base.codigo})`}: retirada {dia(periodo.retirada)}, devolução{" "}
+                  {dia(periodo.devolucao)}. Locação de {formatarPreco(totalDoItem(item))}.
+                  {item.personalizacao && ` Personalização: ${item.personalizacao}.`}
                 </p>
               );
             })}
@@ -182,9 +185,9 @@ export function FormularioCheckout() {
         <h2 className="font-display text-xl font-semibold">Sua reserva</h2>
         <ul className="flex flex-col gap-1 text-sm">
           {itens.map((item: ItemCarrinho) => (
-            <li key={`${item.codigo}-${item.festa}`} className="flex justify-between gap-2">
+            <li key={`${item.codigoBolo}-${item.festa}`} className="flex justify-between gap-2">
               <span>{item.nome} · festa {dia(item.festa)}</span>
-              <span>{formatarPreco(item.precoLocacao)}</span>
+              <span>{formatarPreco(totalDoItem(item))}</span>
             </li>
           ))}
         </ul>

@@ -1,4 +1,5 @@
 [
-  { "codigo": "0211", "festa": "2026-10-24" },
-  { "codigo": "9001", "festa": "2026-10-31" }
+  { "codigo": "SAFARI_001", "festa": "2026-10-31" },
+  { "codigo": "TOPO_001", "festa": "2026-11-07" },
+  { "codigo": "BASE_DOURADA_001", "festa": "2026-11-07" }
 ]

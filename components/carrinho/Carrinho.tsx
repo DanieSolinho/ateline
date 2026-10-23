@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Trash2 } from "lucide-react";
 import { useCarrinho } from "@/hooks/useCarrinho";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
-import { resumoDoCarrinho } from "@/lib/carrinho";
+import { resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
 
@@ -42,16 +42,21 @@ export function Carrinho() {
         {itens.map((item) => {
           const periodo = calcularPeriodo(item.festa);
           return (
-            <li key={`${item.codigo}-${item.festa}`} className="flex gap-4 rounded-2xl border border-linha p-4">
+            <li key={`${item.codigoBolo}-${item.festa}`} className="flex gap-4 rounded-2xl border border-linha p-4">
               <div aria-hidden="true" className="h-28 w-22 shrink-0 rounded-xl bg-rosa" />
               <div className="flex min-w-0 flex-1 flex-col gap-1">
                 <Link
-                  href={`/bolo/${item.codigo}`}
+                  href={`/bolo/${item.codigoBolo}`}
                   className="font-display text-lg font-semibold hover:text-framboesa"
                 >
                   {item.nome}
                 </Link>
-                <p className="text-sm text-ameixa-suave">Ref. {item.codigo}</p>
+                {(item.topo || item.base) && (
+                  <p className="text-sm text-ameixa-suave">
+                    Com {[item.topo?.nome, item.base?.nome].filter(Boolean).join(" e ").toLowerCase()}
+                  </p>
+                )}
+                {item.personalizacao && <p className="text-sm text-ameixa-suave">{item.personalizacao}</p>}
                 <p className="text-sm">
                   <strong>Festa:</strong> {dia(item.festa)}
                 </p>
@@ -61,10 +66,10 @@ export function Carrinho() {
                 </p>
               </div>
               <div className="flex flex-col items-end justify-between">
-                <span className="font-bold">{formatarPreco(item.precoLocacao)}</span>
+                <span className="font-bold">{formatarPreco(totalDoItem(item))}</span>
                 <button
                   type="button"
-                  onClick={() => remover(item.codigo, item.festa)}
+                  onClick={() => remover(item.codigoBolo, item.festa)}
                   aria-label={`Remover ${item.nome}`}
                   className="grid size-11 place-items-center rounded-full text-ameixa-suave hover:bg-blush hover:text-alerta"
                 >

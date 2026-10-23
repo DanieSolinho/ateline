@@ -48,3 +48,8 @@ export function estaDisponivel(codigo: string, dataFesta: string, reservas: Rese
       reserva.codigo === codigo && periodosSeSobrepoem(pedido, calcularPeriodo(reserva.festa)),
   );
 }
+
+// Para peças com várias unidades iguais (ex.: as bases douradas): a primeira livre na data, ou null
+export function primeiraUnidadeLivre(codigos: string[], dataFesta: string, reservas: Reserva[]): string | null {
+  return codigos.find((codigo) => estaDisponivel(codigo, dataFesta, reservas)) ?? null;
+}
