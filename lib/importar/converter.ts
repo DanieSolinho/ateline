@@ -2,6 +2,7 @@ import type {
   Acessorio,
   BoloCatalogo,
   Catalogo,
+  Cupom,
   OpcaoAluguel,
   Personalizacao,
   StatusPeca,
@@ -64,6 +65,7 @@ export function converterCatalogo(planilha: {
   opcoes: Linha[];
   topos: Linha[];
   bases: Linha[];
+  cupom?: { codigo: unknown; desconto: unknown };
 }): Resultado {
   const erros: string[] = [];
   const avisos: string[] = [];
@@ -180,5 +182,18 @@ export function converterCatalogo(planilha: {
     }
   }
 
-  return { catalogo: { bolos, opcoes, topos, bases }, erros, avisos };
+  // ---------- Cupom dos bolos refeitos ----------
+  let cupomRefazer: Cupom | null = null;
+  const codigoCupom = texto(planilha.cupom?.codigo).toUpperCase();
+  if (codigoCupom) {
+    let desconto = numero(planilha.cupom?.desconto) ?? 0;
+    if (desconto > 1) desconto = desconto / 100; // aceita "30" e "30%" (0,3)
+    if (desconto <= 0 || desconto >= 1) {
+      erros.push(`Cupom ${codigoCupom}: o desconto precisa ficar entre 1% e 99%.`);
+    } else {
+      cupomRefazer = { codigo: codigoCupom, desconto };
+    }
+  }
+
+  return { catalogo: { bolos, opcoes, topos, bases, cupomRefazer }, erros, avisos };
 }

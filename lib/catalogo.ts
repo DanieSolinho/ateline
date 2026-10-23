@@ -1,5 +1,5 @@
 import dados from "@/data/catalogo.json";
-import type { Acessorio, BoloVitrine, Catalogo, StatusPeca } from "@/types/catalogo";
+import type { Acessorio, BoloRefazivel, BoloVitrine, Catalogo, Cupom, StatusPeca } from "@/types/catalogo";
 
 // Os dados vêm de data/catalogo.json, gerado por "npm run importar".
 // Quando o Supabase entrar, só este arquivo muda.
@@ -54,4 +54,26 @@ export async function getTopos(codigos: string[]): Promise<Acessorio[]> {
 
 export async function getBases(): Promise<Acessorio[]> {
   return catalogo.bases.filter((base) => podeReservar(base.status));
+}
+
+// Bolos "Inativo" que podem ser refeitos e têm preço de encomenda nova em alguma opção
+export function montarRefaziveis(dadosDoCatalogo: Catalogo): BoloRefazivel[] {
+  return dadosDoCatalogo.bolos
+    .filter((bolo) => bolo.status === "inativo" && bolo.podeSerRefeito)
+    .map((bolo) => ({
+      ...bolo,
+      opcoes: dadosDoCatalogo.opcoes
+        .filter((opcao) => opcao.codigoBolo === bolo.codigo)
+        .filter((opcao): opcao is BoloRefazivel["opcoes"][number] => opcao.precoEncomendaNova !== null)
+        .sort((a, b) => a.andares - b.andares || (a.decoracao ?? "").localeCompare(b.decoracao ?? "")),
+    }))
+    .filter((bolo) => bolo.opcoes.length > 0);
+}
+
+export async function getRefaziveis(): Promise<BoloRefazivel[]> {
+  return montarRefaziveis(catalogo);
+}
+
+export async function getCupomRefazer(): Promise<Cupom | null> {
+  return catalogo.cupomRefazer;
 }

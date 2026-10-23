@@ -29,7 +29,15 @@ const coroa: Linha = {
   Status: "Disponível",
 };
 
-function converter(extra: Partial<{ bolos: Linha[]; opcoes: Linha[]; topos: Linha[]; bases: Linha[] }> = {}) {
+function converter(
+  extra: Partial<{
+    bolos: Linha[];
+    opcoes: Linha[];
+    topos: Linha[];
+    bases: Linha[];
+    cupom: { codigo: unknown; desconto: unknown };
+  }> = {},
+) {
   return converterCatalogo({ bolos: [safari], opcoes: [opcao3A], topos: [coroa], bases: [], ...extra });
 }
 
@@ -94,5 +102,23 @@ describe("converterCatalogo", () => {
   it("acusa códigos repetidos", () => {
     const { erros } = converter({ opcoes: [opcao3A, opcao3A] });
     expect(erros.some((erro) => erro.includes("mais de uma vez"))).toBe(true);
+  });
+});
+
+describe("cupom dos bolos refeitos", () => {
+  it("lê o código e o desconto (0,3 ou 30)", () => {
+    expect(converter({ cupom: { codigo: "refaz30", desconto: 0.3 } }).catalogo.cupomRefazer).toEqual({
+      codigo: "REFAZ30",
+      desconto: 0.3,
+    });
+    expect(converter({ cupom: { codigo: "REFAZ30", desconto: 30 } }).catalogo.cupomRefazer?.desconto).toBe(0.3);
+  });
+
+  it("sem código, fica sem cupom", () => {
+    expect(converter().catalogo.cupomRefazer).toBeNull();
+  });
+
+  it("acusa desconto impossível", () => {
+    expect(converter({ cupom: { codigo: "REFAZ", desconto: 0 } }).erros[0]).toContain("desconto");
   });
 });

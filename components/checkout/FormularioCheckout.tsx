@@ -109,6 +109,14 @@ export function FormularioCheckout() {
             <input id="email" name="email" type="email" autoComplete="email" defaultValue={valores.email}
               aria-invalid={!!erros.email} aria-describedby="email-erro" className={estiloCampo} />
           </Campo>
+          <Campo nome="chavePix" rotulo="Chave Pix (para devolver a taxa de segurança)" erro={erros.chavePix}>
+            <input id="chavePix" name="chavePix" placeholder="CPF, e-mail, telefone ou chave aleatória"
+              defaultValue={valores.chavePix} aria-invalid={!!erros.chavePix}
+              aria-describedby="chavePix-erro chavePix-dica" className={estiloCampo} />
+            <p id="chavePix-dica" className="text-sm text-ameixa-suave">
+              Quando a peça volta conferida, devolvemos os R$ {TAXA_SEGURANCA},00 nessa chave.
+            </p>
+          </Campo>
         </fieldset>
 
         <fieldset className="flex flex-col gap-3 rounded-2xl border border-linha p-5">

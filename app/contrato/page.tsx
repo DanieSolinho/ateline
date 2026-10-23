@@ -31,6 +31,7 @@ export default function ContratoPage() {
         <ul>
           <li>Não é devolvida em caso de devolução fora do prazo ou de avarias como furos, cola e sujeira.</li>
           <li>Se o bolo tiver vela acoplada e ela não voltar, são descontados R$ 10,00.</li>
+          <li>A devolução é feita por Pix, na chave informada na reserva, depois que a peça é conferida.</li>
         </ul>
       </section>
 

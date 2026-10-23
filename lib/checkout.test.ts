@@ -6,6 +6,7 @@ const valido = {
   cpf: "529.982.247-25",
   whatsapp: "(21) 98765-4321",
   email: "maria@exemplo.com",
+  chavePix: "maria@exemplo.com",
   entrega: "retirada",
   pagamento: "pix",
   aceite: "sim",
@@ -29,5 +30,11 @@ describe("esquemaCheckout", () => {
     expect(
       esquemaCheckout.safeParse({ ...valido, entrega: "entrega", endereco: "Rua X, 10, Benfica, 20911-000" }).success,
     ).toBe(true);
+  });
+
+  it("exige a chave Pix para devolver a taxa de segurança", () => {
+    const resultado = esquemaCheckout.safeParse({ ...valido, chavePix: "" });
+    expect(resultado.success).toBe(false);
+    expect(resultado.error?.issues[0].path).toEqual(["chavePix"]);
   });
 });

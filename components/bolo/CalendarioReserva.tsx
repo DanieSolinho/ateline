@@ -1,16 +1,14 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { diaPorExtenso, diasDoMes, hojeIso, nomeDoMes, primeiraMaiuscula } from "@/lib/calendario";
+import { useHoje } from "@/hooks/useHoje";
+import { diaPorExtenso, diasDoMes, nomeDoMes, primeiraMaiuscula } from "@/lib/calendario";
 import { calcularPeriodo, estaDisponivel } from "@/lib/periodo";
 import type { Reserva } from "@/types/reserva";
 
 const SEMANA = ["D", "S", "T", "Q", "Q", "S", "S"];
 
-// "Hoje" só existe no navegador. No servidor devolvemos null e o calendário espera.
-const naoMuda = () => () => {};
-const hojeNoServidor = () => null;
 
 type Situacao = "livre" | "reservado" | "passado";
 
@@ -29,7 +27,7 @@ type Props = {
 };
 
 export function CalendarioReserva({ codigo, reservas, festa, aoEscolher }: Props) {
-  const hoje = useSyncExternalStore(naoMuda, hojeIso, hojeNoServidor);
+  const hoje = useHoje();
   const [mesEscolhido, setMesEscolhido] = useState<{ ano: number; mes: number } | null>(null);
 
   if (!hoje) {

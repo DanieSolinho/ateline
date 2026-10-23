@@ -8,6 +8,8 @@ export const esquemaCheckout = z
     cpf: z.string().refine(cpfValido, { error: "CPF inválido. Confira os números." }),
     whatsapp: z.string().refine(telefoneValido, { error: "Coloque o WhatsApp com DDD." }),
     email: z.email({ error: "E-mail inválido." }),
+    // Para devolver a taxa de segurança depois que a peça volta
+    chavePix: z.string().trim().min(5, { error: "Coloque a chave Pix para a devolução da taxa de segurança." }),
     entrega: z.enum(["retirada", "entrega"]),
     endereco: z.string().trim().optional(),
     pagamento: z.enum(["pix", "cartao"], { error: "Escolha Pix ou cartão." }),

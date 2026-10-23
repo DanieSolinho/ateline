@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import dados from "@/data/catalogo.json";
-import { montarVitrine } from "./catalogo";
+import { montarRefaziveis, montarVitrine } from "./catalogo";
 import type { BoloCatalogo, Catalogo, OpcaoAluguel } from "@/types/catalogo";
 
 const bolo: BoloCatalogo = {
@@ -31,7 +31,7 @@ function opcao(andares: number, precoLocacao: number, precoVenda: number | null 
 }
 
 function catalogoCom(bolos: BoloCatalogo[], opcoes: OpcaoAluguel[]): Catalogo {
-  return { bolos, opcoes, topos: [], bases: [] };
+  return { bolos, opcoes, topos: [], bases: [], cupomRefazer: null };
 }
 
 describe("montarVitrine", () => {
@@ -56,6 +56,18 @@ describe("montarVitrine", () => {
 
   it("bolo sem opção de aluguel não aparece", () => {
     expect(montarVitrine(catalogoCom([bolo], []))).toEqual([]);
+  });
+});
+
+describe("montarRefaziveis", () => {
+  const inativo = { ...bolo, status: "inativo" as const, podeSerRefeito: true };
+
+  it("lista só bolos inativos que podem ser refeitos e têm preço de encomenda nova", () => {
+    const comPreco = { ...opcao(3, 150), precoEncomendaNova: 400 };
+    expect(montarRefaziveis(catalogoCom([inativo], [comPreco]))).toHaveLength(1);
+    expect(montarRefaziveis(catalogoCom([inativo], [opcao(3, 150)]))).toHaveLength(0);
+    expect(montarRefaziveis(catalogoCom([{ ...inativo, podeSerRefeito: false }], [comPreco]))).toHaveLength(0);
+    expect(montarRefaziveis(catalogoCom([bolo], [comPreco]))).toHaveLength(0);
   });
 });
 

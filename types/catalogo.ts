@@ -41,11 +41,18 @@ export type Acessorio = {
   previsaoVolta: string | null;
 };
 
+// Cupom de desconto para bolos refeitos (aba "Como usar" da planilha)
+export type Cupom = {
+  codigo: string; // "REFAZ30"
+  desconto: number; // 0.3 = 30%
+};
+
 export type Catalogo = {
   bolos: BoloCatalogo[];
   opcoes: OpcaoAluguel[];
   topos: Acessorio[];
   bases: Acessorio[];
+  cupomRefazer: Cupom | null;
 };
 // Um bolo pronto para a vitrine do site: o bolo + as opções dele + os menores preços
 export type BoloVitrine = BoloCatalogo & {
@@ -53,4 +60,9 @@ export type BoloVitrine = BoloCatalogo & {
   menorPrecoLocacao: number;
   menorPrecoVenda: number | null;
   decoracoes: string[];
+};
+
+// Um bolo que não existe mais, mas a Ateline consegue fazer igual (primeira locação)
+export type BoloRefazivel = BoloCatalogo & {
+  opcoes: (OpcaoAluguel & { precoEncomendaNova: number })[];
 };

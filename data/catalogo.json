@@ -123,5 +123,9 @@
       "status": "disponivel",
       "previsaoVolta": null
     }
-  ]
+  ],
+  "cupomRefazer": {
+    "codigo": "REFAZ30",
+    "desconto": 0.3
+  }
 }

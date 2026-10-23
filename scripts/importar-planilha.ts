@@ -43,6 +43,18 @@ function lerAba(planilha: ExcelJS.Workbook, nomeDaAba: string): Linha[] {
   return linhas;
 }
 
+// Na aba "Como usar", o cupom fica numa linha com o rótulo na coluna A e o valor na coluna B
+function lerCupom(planilha: ExcelJS.Workbook): { codigo: unknown; desconto: unknown } {
+  const aba = planilha.getWorksheet("Como usar");
+  const cupom: { codigo: unknown; desconto: unknown } = { codigo: null, desconto: null };
+  aba?.eachRow((linha) => {
+    const rotulo = String(valorDaCelula(linha.getCell(1).value) ?? "").trim();
+    if (rotulo === "Código do cupom") cupom.codigo = valorDaCelula(linha.getCell(2).value);
+    if (rotulo === "Desconto") cupom.desconto = valorDaCelula(linha.getCell(2).value);
+  });
+  return cupom;
+}
+
 async function main() {
   const planilha = new ExcelJS.Workbook();
   await planilha.xlsx.readFile(PLANILHA);
@@ -52,6 +64,7 @@ async function main() {
     opcoes: lerAba(planilha, "Opções de aluguel"),
     topos: lerAba(planilha, "Topos"),
     bases: lerAba(planilha, "Andar avulso"),
+    cupom: lerCupom(planilha),
   });
 
   for (const aviso of avisos) console.log(`⚠️  ${aviso}`);
@@ -65,7 +78,8 @@ async function main() {
   await writeFile(SAIDA, JSON.stringify(catalogo, null, 2) + "\n");
   console.log(
     `\n✅ ${SAIDA} atualizado: ${catalogo.bolos.length} bolos, ${catalogo.opcoes.length} opções, ` +
-      `${catalogo.topos.length} topos e ${catalogo.bases.length} bases.`,
+      `${catalogo.topos.length} topos e ${catalogo.bases.length} bases.` +
+      (catalogo.cupomRefazer ? ` Cupom: ${catalogo.cupomRefazer.codigo}.` : ""),
   );
 }
 
