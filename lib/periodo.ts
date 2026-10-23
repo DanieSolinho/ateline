@@ -53,3 +53,8 @@ export function estaDisponivel(codigo: string, dataFesta: string, reservas: Rese
 export function primeiraUnidadeLivre(codigos: string[], dataFesta: string, reservas: Reserva[]): string | null {
   return codigos.find((codigo) => estaDisponivel(codigo, dataFesta, reservas)) ?? null;
 }
+
+// Uma peça só pode ser vendida se não tiver nenhum aluguel marcado daqui para a frente
+export function livreParaVenda(codigo: string, hoje: string, reservas: Reserva[]): boolean {
+  return !reservas.some((reserva) => reserva.codigo === codigo && calcularPeriodo(reserva.festa).devolucao >= hoje);
+}

@@ -3,8 +3,8 @@ import { carrinhoReducer } from "@/lib/carrinho";
 import type { AcaoCarrinho, ItemCarrinho } from "@/types/carrinho";
 
 // O carrinho fica guardado no navegador (localStorage), então sobrevive a recarregar a página.
-// "v2": o formato do item mudou; carrinhos antigos guardados no navegador são ignorados
-const CHAVE = "ateline-carrinho-v2";
+// "v3": o carrinho passou a ter compras; carrinhos antigos guardados no navegador são ignorados
+const CHAVE = "ateline-carrinho-v3";
 const ouvintes = new Set<() => void>();
 
 // Guardamos o último texto lido para devolver sempre o MESMO array enquanto nada mudar.
@@ -58,7 +58,7 @@ export function useCarrinho() {
   return {
     itens, // null enquanto carrega no navegador
     adicionar: (item: ItemCarrinho) => despachar({ tipo: "adicionar", item }),
-    remover: (codigoBolo: string, festa: string) => despachar({ tipo: "remover", codigoBolo, festa }),
+    remover: (chave: string) => despachar({ tipo: "remover", chave }),
     esvaziar: () => despachar({ tipo: "esvaziar" }),
   };
 }

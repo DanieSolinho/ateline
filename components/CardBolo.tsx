@@ -9,9 +9,11 @@ type CardBoloProps = {
   foto?: string;
   // true = livre na data escolhida · false = reservado · sem valor = nenhuma data escolhida
   disponivel?: boolean;
+  // "compra": card da página Comprar, com o preço de venda em destaque
+  modo?: "aluguel" | "compra";
 };
 
-export function CardBolo({ bolo, foto, disponivel }: CardBoloProps) {
+export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloProps) {
   const reservado = disponivel === false;
   const tamanhos =
     bolo.andaresMin === bolo.andaresMax
@@ -40,7 +42,7 @@ export function CardBolo({ bolo, foto, disponivel }: CardBoloProps) {
           {bolo.decoracoes.length > 0 && ` · ${bolo.decoracoes.join(", ")}`}
         </p>
 
-        <dl className="mt-1 flex flex-col gap-0.5">
+        <dl className={`mt-1 flex gap-0.5 ${modo === "compra" ? "flex-col-reverse" : "flex-col"}`}>
           <div className="flex items-baseline justify-between gap-2">
             <dt className="text-sm text-ameixa-suave">Aluguel a partir de</dt>
             <dd className="font-bold">{formatarPreco(bolo.menorPrecoLocacao)}</dd>
@@ -65,16 +67,25 @@ export function CardBolo({ bolo, foto, disponivel }: CardBoloProps) {
         )}
       </div>
 
-      <Link
-        href={`/bolo/${bolo.codigo}`}
-        className={`grid h-12 place-items-center rounded-xl font-bold ${
-          reservado
-            ? "border-2 border-ameixa bg-white text-ameixa"
-            : "bg-framboesa text-white hover:bg-framboesa-escura"
-        }`}
-      >
-        {reservado ? "Ver datas livres" : "Escolher tamanho e data"}
-      </Link>
+      {modo === "compra" ? (
+        <Link
+          href={`/bolo/${bolo.codigo}#comprar`}
+          className="grid h-12 place-items-center rounded-xl bg-framboesa font-bold text-white hover:bg-framboesa-escura"
+        >
+          Ver e comprar
+        </Link>
+      ) : (
+        <Link
+          href={`/bolo/${bolo.codigo}`}
+          className={`grid h-12 place-items-center rounded-xl font-bold ${
+            reservado
+              ? "border-2 border-ameixa bg-white text-ameixa"
+              : "bg-framboesa text-white hover:bg-framboesa-escura"
+          }`}
+        >
+          {reservado ? "Ver datas livres" : "Escolher tamanho e data"}
+        </Link>
+      )}
     </article>
   );
 }

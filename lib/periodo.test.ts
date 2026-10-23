@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcularPeriodo, estaDisponivel, periodosSeSobrepoem, primeiraUnidadeLivre } from "./periodo";
+import { calcularPeriodo, estaDisponivel, periodosSeSobrepoem, primeiraUnidadeLivre, livreParaVenda } from "./periodo";
 
 describe("calcularPeriodo", () => {
   it("festa no sábado: retira na sexta e devolve na terça", () => {
@@ -80,5 +80,18 @@ describe("primeiraUnidadeLivre", () => {
   it("devolve null quando todas estão reservadas", () => {
     const reservas = bases.map((codigo) => ({ codigo, festa: "2026-11-07" }));
     expect(primeiraUnidadeLivre(bases, "2026-11-07", reservas)).toBeNull();
+  });
+});
+
+describe("livreParaVenda", () => {
+  const reservas = [{ codigo: "SAFARI_001", festa: "2026-10-31" }];
+
+  it("bloqueia a venda enquanto houver aluguel marcado", () => {
+    expect(livreParaVenda("SAFARI_001", "2026-10-23", reservas)).toBe(false);
+  });
+
+  it("libera depois que a peça volta, e não afeta outras peças", () => {
+    expect(livreParaVenda("SAFARI_001", "2026-11-05", reservas)).toBe(true);
+    expect(livreParaVenda("JARDIM_001", "2026-10-23", reservas)).toBe(true);
   });
 });

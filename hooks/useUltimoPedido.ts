@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import type { Pedido } from "@/types/pedido";
 
 // Enquanto não há back-end, o último pedido fica guardado no navegador
-const CHAVE = "ateline-ultimo-pedido";
+const CHAVE = "ateline-ultimo-pedido-v2"; // "v2": o pedido passou a ter compras
 const ouvintes = new Set<() => void>();
 
 let textoEmCache: string | null = null;

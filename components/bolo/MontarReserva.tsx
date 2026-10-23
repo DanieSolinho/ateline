@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Truck } from "lucide-react";
+import { Store, Truck } from "lucide-react";
 import { CalendarioReserva } from "@/components/bolo/CalendarioReserva";
 import { useCarrinho } from "@/hooks/useCarrinho";
+import { useHoje } from "@/hooks/useHoje";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
+import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
-import { calcularPeriodo, estaDisponivel, primeiraUnidadeLivre } from "@/lib/periodo";
+import { calcularPeriodo, estaDisponivel, livreParaVenda, primeiraUnidadeLivre } from "@/lib/periodo";
 import { PERCENTUAL_SINAL, TAXA_SEGURANCA } from "@/lib/regras";
 import type { Acessorio, BoloVitrine } from "@/types/catalogo";
 import type { Reserva } from "@/types/reserva";
@@ -24,11 +27,18 @@ const estiloChip = (ativo: boolean) =>
     ativo ? "border-ameixa bg-ameixa text-white" : "border-ameixa/30 bg-white hover:border-ameixa"
   }`;
 
+// Quem chega pela página "Comprar" vem com #comprar no endereço e já cai na aba de compra
+const semMudancas = () => () => {};
+const veioParaComprar = () => window.location.hash === "#comprar";
+
 export function MontarReserva({ bolo, topos, bases, reservas }: Props) {
   const router = useRouter();
   const { adicionar } = useCarrinho();
 
-  const [modo, setModo] = useState<"alugar" | "comprar">("alugar");
+  const hoje = useHoje();
+  const [modoEscolhido, setModo] = useState<"alugar" | "comprar" | null>(null);
+  const modoPeloLink = useSyncExternalStore(semMudancas, veioParaComprar, () => false) ? "comprar" : "alugar";
+  const modo = modoEscolhido ?? modoPeloLink;
   const [decoracao, setDecoracao] = useState<string | null>(bolo.decoracoes[0] ?? null);
   const [andares, setAndares] = useState(bolo.opcoes[0].andares);
   const [codigoTopo, setCodigoTopo] = useState("");
@@ -62,27 +72,54 @@ export function MontarReserva({ bolo, topos, bases, reservas }: Props) {
   const pedeIdade = bolo.personalizacao === "idade" || bolo.personalizacao === "nome_idade";
   const pedeInicial = bolo.personalizacao === "inicial";
 
-  function reservar() {
-    if (!festa) return setErro("Escolha o dia da festa no calendário.");
-    if (pedeNome && !nome.trim()) return setErro("Escreva o nome que vai no bolo.");
-    if (pedeIdade && !idade.trim()) return setErro("Escreva a idade que vai no bolo.");
-    if (pedeInicial && !inicial.trim()) return setErro("Escreva a inicial que vai no bolo.");
+  const nomeDoItem = [bolo.nome, opcao.decoracao, `${opcao.andares} andares`].filter(Boolean).join(" · ");
 
+  // Venda: só peças em bom estado, com preço de venda e sem aluguel marcado daqui para a frente
+  const vendaLiberada = bolo.status === "disponivel" && hoje !== null && livreParaVenda(bolo.codigo, hoje, reservas);
+
+  // Confere a personalização e devolve o texto dela (ou null se faltar algo)
+  function lerPersonalizacao(): { ok: boolean; texto: string | null } {
+    if (pedeNome && !nome.trim()) return (setErro("Escreva o nome que vai no bolo."), { ok: false, texto: null });
+    if (pedeIdade && !idade.trim()) return (setErro("Escreva a idade que vai no bolo."), { ok: false, texto: null });
+    if (pedeInicial && !inicial.trim()) return (setErro("Escreva a inicial que vai no bolo."), { ok: false, texto: null });
     const partes = [
       pedeNome && `Nome: ${nome.trim()}`,
       pedeIdade && `Idade: ${idade.trim()}`,
       pedeInicial && `Inicial: ${inicial.trim().toUpperCase()}`,
     ].filter(Boolean);
+    return { ok: true, texto: partes.length > 0 ? partes.join(" · ") : null };
+  }
 
+  function comprar() {
+    if (opcao.precoVenda === null || !vendaLiberada) return;
+    const personalizacao = lerPersonalizacao();
+    if (!personalizacao.ok) return;
     adicionar({
+      tipo: "compra",
       codigoBolo: bolo.codigo,
       codigoOpcao: opcao.codigo,
-      nome: [bolo.nome, opcao.decoracao, `${opcao.andares} andares`].filter(Boolean).join(" · "),
+      nome: nomeDoItem,
+      preco: opcao.precoVenda,
+      personalizacao: personalizacao.texto,
+    });
+    router.push("/carrinho");
+  }
+
+  function reservar() {
+    if (!festa) return setErro("Escolha o dia da festa no calendário.");
+    const personalizacao = lerPersonalizacao();
+    if (!personalizacao.ok) return;
+
+    adicionar({
+      tipo: "aluguel",
+      codigoBolo: bolo.codigo,
+      codigoOpcao: opcao.codigo,
+      nome: nomeDoItem,
       festa,
       precoOpcao: opcao.precoLocacao,
       topo: topo ? { codigo: topo.codigo, nome: topo.nome, preco: topo.precoLocacao } : null,
       base: comBase && unidadeDaBase ? { codigo: unidadeDaBase, nome: "Base dourada", preco: precoBase } : null,
-      personalizacao: partes.length > 0 ? partes.join(" · ") : null,
+      personalizacao: personalizacao.texto,
     });
     router.push("/carrinho");
   }
@@ -98,7 +135,10 @@ export function MontarReserva({ bolo, topos, bases, reservas }: Props) {
               key={valor}
               type="button"
               aria-pressed={ativo}
-              onClick={() => setModo(valor)}
+              onClick={() => {
+                setModo(valor);
+                setErro("");
+              }}
               className={`flex flex-col items-center rounded-xl py-3 ${
                 ativo ? "bg-white shadow-sm" : "text-ameixa-suave hover:text-ameixa"
               }`}
@@ -138,16 +178,87 @@ export function MontarReserva({ bolo, topos, bases, reservas }: Props) {
         </div>
       </fieldset>
 
+      {(pedeNome || pedeIdade || pedeInicial) && (
+        <fieldset className="grid gap-3 sm:grid-cols-2">
+          <legend className="mb-2 font-bold">Personalização (inclusa)</legend>
+          {pedeNome && (
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Nome no bolo
+              <input value={nome} onChange={(e) => setNome(e.target.value)} maxLength={20}
+                className="h-12 rounded-xl border border-ameixa/30 px-3 text-base font-normal" />
+            </label>
+          )}
+          {pedeIdade && (
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Idade
+              <input value={idade} onChange={(e) => setIdade(e.target.value)} inputMode="numeric" maxLength={3}
+                className="h-12 rounded-xl border border-ameixa/30 px-3 text-base font-normal" />
+            </label>
+          )}
+          {pedeInicial && (
+            <label className="flex flex-col gap-1.5 text-sm font-semibold">
+              Inicial
+              <input value={inicial} onChange={(e) => setInicial(e.target.value)} maxLength={2}
+                className="h-12 w-24 rounded-xl border border-ameixa/30 px-3 text-base font-normal uppercase" />
+            </label>
+          )}
+        </fieldset>
+      )}
+
       {modo === "comprar" ? (
-        <div className="flex flex-col gap-4 rounded-2xl border border-linha p-5">
-          <p className="flex items-center gap-2 font-bold">
-            <Truck size={18} /> Envio para todo o Brasil
-          </p>
-          <p className="text-ameixa-suave">O bolo fica com você. O frete é calculado pelo CEP na finalização da compra.</p>
-          <button type="button" disabled className="h-14 rounded-xl bg-framboesa text-lg font-bold text-white opacity-50">
-            {opcao.precoVenda !== null ? `Comprar por ${formatarPreco(opcao.precoVenda)} (em breve)` : "Venda sob consulta"}
-          </button>
-        </div>
+        <section aria-live="polite" className="flex flex-col gap-4 rounded-2xl bg-blush p-5">
+          <ul className="flex flex-col gap-2">
+            <li className="flex items-center gap-2 font-semibold">
+              <Store size={18} aria-hidden /> Retirada grátis na loja, na Praça Seca
+            </li>
+            <li className="flex items-center gap-2 font-semibold">
+              <Truck size={18} aria-hidden /> Envio por transportadora, com frete orçado no WhatsApp
+            </li>
+          </ul>
+          {opcao.precoVenda !== null && (
+            <dl className="flex flex-col gap-1">
+              <div className="flex justify-between">
+                <dt>Sinal agora (50%)</dt>
+                <dd className="font-bold">{formatarPreco(opcao.precoVenda * PERCENTUAL_SINAL)}</dd>
+              </div>
+              <div className="flex justify-between text-sm text-ameixa-suave">
+                <dt>Restante: na retirada ou antes do envio</dt>
+                <dd>{formatarPreco(opcao.precoVenda * (1 - PERCENTUAL_SINAL))}</dd>
+              </div>
+            </dl>
+          )}
+
+          {opcao.precoVenda === null ? (
+            <a
+              href={linkWhatsApp(`Olá! Quero saber o valor para comprar o bolo ${nomeDoItem} (${bolo.codigo}).`) ?? "#"}
+              target="_blank"
+              rel="noopener"
+              className="grid h-14 place-items-center rounded-xl border-2 border-ameixa bg-white text-lg font-bold hover:bg-rosa"
+            >
+              Venda sob consulta · falar no WhatsApp
+            </a>
+          ) : hoje !== null && !vendaLiberada ? (
+            <p className="rounded-xl bg-white p-4 text-sm">
+              Esta peça tem aluguéis marcados e não pode ser vendida agora. Que tal{" "}
+              <Link href="/encomenda" className="font-bold text-framboesa underline">
+                encomendar um igual
+              </Link>
+              ?
+            </p>
+          ) : (
+            <>
+              {erro && <p role="alert" className="font-semibold text-alerta">{erro}</p>}
+              <button
+                type="button"
+                onClick={comprar}
+                disabled={hoje === null}
+                className="h-14 rounded-xl bg-framboesa text-lg font-bold text-white hover:bg-framboesa-escura disabled:opacity-60"
+              >
+                Comprar por {formatarPreco(opcao.precoVenda)}
+              </button>
+            </>
+          )}
+        </section>
       ) : (
         <>
           {bolo.tipoTopo === "fixo" && <p className="text-ameixa-suave">Topo incluso no bolo.</p>}
@@ -187,33 +298,6 @@ export function MontarReserva({ bolo, topos, bases, reservas }: Props) {
                 </span>
               </span>
             </label>
-          )}
-
-          {(pedeNome || pedeIdade || pedeInicial) && (
-            <fieldset className="grid gap-3 sm:grid-cols-2">
-              <legend className="mb-2 font-bold">Personalização (inclusa)</legend>
-              {pedeNome && (
-                <label className="flex flex-col gap-1.5 text-sm font-semibold">
-                  Nome no bolo
-                  <input value={nome} onChange={(e) => setNome(e.target.value)} maxLength={20}
-                    className="h-12 rounded-xl border border-ameixa/30 px-3 text-base font-normal" />
-                </label>
-              )}
-              {pedeIdade && (
-                <label className="flex flex-col gap-1.5 text-sm font-semibold">
-                  Idade
-                  <input value={idade} onChange={(e) => setIdade(e.target.value)} inputMode="numeric" maxLength={3}
-                    className="h-12 rounded-xl border border-ameixa/30 px-3 text-base font-normal" />
-                </label>
-              )}
-              {pedeInicial && (
-                <label className="flex flex-col gap-1.5 text-sm font-semibold">
-                  Inicial
-                  <input value={inicial} onChange={(e) => setInicial(e.target.value)} maxLength={2}
-                    className="h-12 w-24 rounded-xl border border-ameixa/30 px-3 text-base font-normal uppercase" />
-                </label>
-              )}
-            </fieldset>
           )}
 
           <CalendarioReserva codigo={bolo.codigo} reservas={reservas} festa={festa}

@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { carrinhoReducer, resumoDoCarrinho, totalDoItem } from "./carrinho";
-import type { ItemCarrinho } from "@/types/carrinho";
+import { carrinhoReducer, chaveDoItem, resumoDoCarrinho, totalDoItem } from "./carrinho";
+import type { ItemAluguel, ItemCompra } from "@/types/carrinho";
 
-const jardim: ItemCarrinho = {
+const jardim: ItemAluguel = {
+  tipo: "aluguel",
   codigoBolo: "JARDIM_001",
   codigoOpcao: "JARDIM_001_FLORES_3A",
   nome: "Jardim encantado · Flores · 3 andares",
@@ -13,7 +14,8 @@ const jardim: ItemCarrinho = {
   personalizacao: "Nome: Alice",
 };
 
-const safari: ItemCarrinho = {
+const safari: ItemAluguel = {
+  tipo: "aluguel",
   codigoBolo: "SAFARI_001",
   codigoOpcao: "SAFARI_001_3A",
   nome: "Safari · 3 andares",
@@ -24,10 +26,23 @@ const safari: ItemCarrinho = {
   personalizacao: null,
 };
 
+const compraSafari: ItemCompra = {
+  tipo: "compra",
+  codigoBolo: "SAFARI_001",
+  codigoOpcao: "SAFARI_001_3A",
+  nome: "Safari · 3 andares",
+  preco: 420,
+  personalizacao: null,
+};
+
 describe("totalDoItem", () => {
-  it("soma opção, topo e base", () => {
+  it("aluguel soma opção, topo e base", () => {
     expect(totalDoItem(jardim)).toBe(210);
     expect(totalDoItem(safari)).toBe(150);
+  });
+
+  it("compra é o preço de venda", () => {
+    expect(totalDoItem(compraSafari)).toBe(420);
   });
 });
 
@@ -46,10 +61,16 @@ describe("carrinhoReducer", () => {
     expect(carrinhoReducer([safari], { tipo: "adicionar", item: outraData })).toHaveLength(2);
   });
 
+  it("comprar uma peça tira os aluguéis dela do carrinho, e vice-versa", () => {
+    expect(carrinhoReducer([jardim, safari], { tipo: "adicionar", item: compraSafari })).toEqual([
+      jardim,
+      compraSafari,
+    ]);
+    expect(carrinhoReducer([compraSafari], { tipo: "adicionar", item: safari })).toEqual([safari]);
+  });
+
   it("remove só o item certo", () => {
-    expect(
-      carrinhoReducer([jardim, safari], { tipo: "remover", codigoBolo: "JARDIM_001", festa: "2026-10-31" }),
-    ).toEqual([safari]);
+    expect(carrinhoReducer([jardim, safari], { tipo: "remover", chave: chaveDoItem(jardim) })).toEqual([safari]);
   });
 
   it("esvazia", () => {
@@ -58,8 +79,28 @@ describe("carrinhoReducer", () => {
 });
 
 describe("resumoDoCarrinho", () => {
-  it("sinal de 50% e uma taxa de segurança por bolo", () => {
+  it("aluguel: sinal de 50% e uma taxa de segurança por bolo", () => {
     // locação 210 + 150 = 360 → sinal 180 → na retirada 180 + 2 × 50
-    expect(resumoDoCarrinho([jardim, safari])).toEqual({ locacao: 360, sinal: 180, taxas: 100, naRetirada: 280 });
+    expect(resumoDoCarrinho([jardim, safari])).toMatchObject({
+      locacao: 360,
+      sinal: 180,
+      taxas: 100,
+      naRetirada: 280,
+      pagarAgora: 180,
+      temCompra: false,
+    });
+  });
+
+  it("compra: sinal de 50% agora, sem taxa de segurança", () => {
+    expect(resumoDoCarrinho([jardim, compraSafari])).toMatchObject({
+      sinal: 105,
+      taxas: 50,
+      compras: 420,
+      sinalCompras: 210,
+      restanteCompras: 210,
+      pagarAgora: 315,
+      temAluguel: true,
+      temCompra: true,
+    });
   });
 });
