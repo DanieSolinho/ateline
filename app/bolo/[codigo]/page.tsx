@@ -1,12 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Truck } from "lucide-react";
-import { CalendarioReserva } from "@/components/bolo/CalendarioReserva";
+import { AlugarOuComprar } from "@/components/bolo/AlugarOuComprar";
 import { getBolo, getBolos } from "@/lib/bolos";
-import { formatarPreco } from "@/lib/formatar";
 import { getReservas } from "@/lib/reservas";
-import { TAXA_SEGURANCA } from "@/lib/regras";
 
 // O site é estático: geramos uma página para cada bolo na hora de publicar
 export async function generateStaticParams() {
@@ -29,7 +26,6 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
   if (!bolo) notFound();
 
   const reservas = (await getReservas()).filter((reserva) => reserva.codigo === codigo);
-  const ehVenda = bolo.modalidade === "venda";
   const detalhe =
     bolo.tipo === "bolo"
       ? `${bolo.andares} ${bolo.andares === 1 ? "andar" : "andares"}`
@@ -56,38 +52,10 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
             </p>
           </div>
 
-          {ehVenda ? (
-            <div className="flex flex-col gap-4">
-              {bolo.precoVenda !== undefined && (
-                <p className="font-display text-3xl font-bold">{formatarPreco(bolo.precoVenda)}</p>
-              )}
-              <p className="flex items-center gap-2 font-bold">
-                <Truck size={18} /> Envio para todo o Brasil
-              </p>
-              <button
-                type="button"
-                disabled
-                className="h-14 rounded-xl bg-framboesa text-lg font-bold text-white opacity-50"
-              >
-                Comprar (em breve)
-              </button>
-            </div>
-          ) : (
-            <>
-              {bolo.precoLocacao !== undefined && (
-                <p>
-                  <span className="font-display text-3xl font-bold">{formatarPreco(bolo.precoLocacao)}</span>{" "}
-                  <span className="font-semibold text-ameixa-suave">
-                    por locação · + {formatarPreco(TAXA_SEGURANCA)} de taxa de segurança, devolvida
-                  </span>
-                </p>
-              )}
-              <CalendarioReserva bolo={bolo} reservas={reservas} />
-            </>
-          )}
+          <AlugarOuComprar bolo={bolo} reservas={reservas} />
 
           <section className="flex flex-col gap-2 border-t border-linha pt-6">
-            <h2 className="font-display text-lg font-semibold">Cuidados com a peça</h2>
+            <h2 className="font-display text-lg font-semibold">Cuidados com a peça alugada</h2>
             <ul className="list-disc space-y-1 pl-5 text-ameixa-suave">
               <li>Não use cola, água, tinta ou outro material no bolo.</li>
               <li>Devolva limpo e no prazo do contrato.</li>

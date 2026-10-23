@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Check, CircleSlash, Truck } from "lucide-react";
+import { Check, CircleSlash } from "lucide-react";
 import type { Bolo, TipoBolo } from "@/types/bolo";
 import { formatarPreco } from "@/lib/formatar";
 
@@ -11,27 +11,18 @@ type CardBoloProps = {
 };
 
 const nomeDoTipo: Record<TipoBolo, string> = {
-  bolo: "Aluguel",
+  bolo: "Bolo",
   mini_kit: "Mini kit",
   kit_completo: "Kit completo",
 };
 
 export function CardBolo({ bolo, disponivel }: CardBoloProps) {
-  const ehVenda = bolo.modalidade === "venda";
   const reservado = disponivel === false;
-
-  const selo = ehVenda ? "Venda" : nomeDoTipo[bolo.tipo];
-  const preco = ehVenda ? bolo.precoVenda : bolo.precoLocacao;
-  const sufixo = ehVenda ? "" : bolo.tipo === "bolo" ? "/ locação" : "/ kit";
 
   const detalhe =
     bolo.tipo === "bolo"
       ? `${bolo.andares} ${bolo.andares === 1 ? "andar" : "andares"}`
       : bolo.itensKit?.join(", ");
-
-  let textoBotao = "Reservar";
-  if (ehVenda) textoBotao = "Comprar";
-  if (reservado) textoBotao = "Ver datas livres";
 
   return (
     <article className="flex flex-col gap-3">
@@ -54,7 +45,7 @@ export function CardBolo({ bolo, disponivel }: CardBoloProps) {
           </span>
         )}
         <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold">
-          {selo}
+          {nomeDoTipo[bolo.tipo]}
         </span>
       </div>
 
@@ -65,24 +56,23 @@ export function CardBolo({ bolo, disponivel }: CardBoloProps) {
           {detalhe && ` · ${detalhe}`}
         </p>
 
-        {preco !== undefined && (
-          <p className="text-lg font-bold">
-            {formatarPreco(preco)}{" "}
-            <span className="text-sm font-semibold text-ameixa-suave">{sufixo}</span>
-          </p>
-        )}
+        <dl className="mt-1 flex flex-col gap-0.5">
+          <div className="flex items-baseline justify-between gap-2">
+            <dt className="text-sm text-ameixa-suave">Aluguel</dt>
+            <dd className="font-bold">{formatarPreco(bolo.precoLocacao)}</dd>
+          </div>
+          <div className="flex items-baseline justify-between gap-2">
+            <dt className="text-sm text-ameixa-suave">Compra</dt>
+            <dd className="font-bold">{formatarPreco(bolo.precoVenda)}</dd>
+          </div>
+        </dl>
 
-        {ehVenda && (
-          <p className="flex items-center gap-1.5 text-sm font-bold">
-            <Truck size={16} /> Envio para todo o Brasil
-          </p>
-        )}
-        {!ehVenda && disponivel === true && (
+        {disponivel === true && (
           <p className="flex items-center gap-1.5 text-sm font-bold text-folha">
             <Check size={16} /> Livre na sua data
           </p>
         )}
-        {!ehVenda && reservado && (
+        {reservado && (
           <p className="flex items-center gap-1.5 text-sm font-bold text-alerta">
             <CircleSlash size={16} /> Reservado nessa data
           </p>
@@ -97,7 +87,7 @@ export function CardBolo({ bolo, disponivel }: CardBoloProps) {
             : "bg-framboesa text-white hover:bg-framboesa-escura"
         }`}
       >
-        {textoBotao}
+        {reservado ? "Ver datas livres" : "Alugar ou comprar"}
       </Link>
     </article>
   );

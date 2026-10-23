@@ -56,7 +56,7 @@ export function CalendarioReserva({ bolo, reservas }: Props) {
   }
 
   const periodo = festa ? calcularPeriodo(festa) : null;
-  const locacao = bolo.precoLocacao ?? 0;
+  const locacao = bolo.precoLocacao;
   const sinal = locacao * PERCENTUAL_SINAL;
   const naRetirada = locacao - sinal + TAXA_SEGURANCA;
 
