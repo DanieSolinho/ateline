@@ -1,7 +1,7 @@
 // Contatos da loja, num lugar só.
 // WhatsApp: "55" + DDD + número, só os dígitos. Ex.: "5521999998888".
 // Enquanto estiver vazio, o botão do WhatsApp não aparece no site.
-export const WHATSAPP_LOJA = "5521999998888";
+export const WHATSAPP_LOJA = "5521964254308";
 
 export const INSTAGRAM_LOJA = "https://www.instagram.com/atelineatelie";
 
