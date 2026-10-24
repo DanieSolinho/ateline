@@ -13,9 +13,9 @@ const passos = [
 
 export function ComoFunciona() {
   return (
-    <section className="bg-ameixa text-blush">
+    <section aria-labelledby="como-funciona-titulo" className="bg-ameixa text-blush">
       <div className="mx-auto max-w-7xl px-4 py-16">
-        <h2 className="font-display text-3xl font-semibold text-white">Como funciona o aluguel</h2>
+        <h2 id="como-funciona-titulo" className="font-display text-3xl font-semibold text-white">Como funciona o aluguel</h2>
         <p className="mt-2 mb-8 max-w-xl text-[#e2cdd3]">
           Tudo pelo site. Você só vem à loja para retirar e devolver.
         </p>

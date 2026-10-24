@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { PaginaDeTexto } from "@/components/PaginaDeTexto";
+import { urlCompleta } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Contrato de locação | Ateline" };
+export const metadata: Metadata = {
+  title: "Contrato de locação",
+  description:
+    "Os principais pontos do contrato de locação de bolos cenográficos da Ateline.",
+  alternates: { canonical: urlCompleta("/contrato") },
+};
 
 export default function ContratoPage() {
   return (

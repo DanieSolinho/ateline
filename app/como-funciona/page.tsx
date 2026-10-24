@@ -4,8 +4,14 @@ import { ComoFunciona } from "@/components/home/ComoFunciona";
 import { PaginaDeTexto } from "@/components/PaginaDeTexto";
 import { formatarPreco } from "@/lib/formatar";
 import { TAXA_SEGURANCA } from "@/lib/regras";
+import { urlCompleta } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Como funciona | Ateline" };
+export const metadata: Metadata = {
+  title: "Como funciona",
+  description:
+    "Como funciona o aluguel de bolos cenográficos na Ateline: reserva com 50% de sinal, retirada, taxa de segurança e devolução.",
+  alternates: { canonical: urlCompleta("/como-funciona") },
+};
 
 export default function ComoFuncionaPage() {
   return (

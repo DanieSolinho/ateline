@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { diaPorExtenso, diasDoMes, horarioDaLoja, nomeDoMes } from "./calendario";
+import { diaPorExtenso, diasDoMes, horarioDaLoja, nomeDoMes, rotuloDoDia } from "./calendario";
 
 describe("diasDoMes", () => {
   it("outubro de 2026 começa numa quinta: 4 espaços vazios antes do dia 1", () => {
@@ -21,6 +21,7 @@ describe("textos de data", () => {
 
   it("escreve o dia da semana", () => {
     expect(diaPorExtenso("2026-10-24")).toBe("sábado, 24/10");
+    expect(rotuloDoDia("2026-11-01")).toBe("1 de novembro, domingo");
   });
 
   it("usa o horário de sábado e o de dia de semana", () => {

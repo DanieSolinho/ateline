@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MontarReserva } from "@/components/bolo/MontarReserva";
 import { getBases, getBoloDaVitrine, getTopos, getVitrine } from "@/lib/catalogo";
+import { formatarPreco } from "@/lib/formatar";
 import { getReservas } from "@/lib/reservas";
+import { IMAGEM_DE_COMPARTILHAR, urlCompleta } from "@/lib/site";
 
 // O site é estático: geramos uma página para cada bolo da vitrine na hora de publicar
 export async function generateStaticParams() {
@@ -17,7 +19,28 @@ export const dynamicParams = false;
 export async function generateMetadata({ params }: PageProps<"/bolo/[codigo]">): Promise<Metadata> {
   const { codigo } = await params;
   const bolo = await getBoloDaVitrine(codigo);
-  return { title: bolo ? `${bolo.nome} | Ateline` : "Bolo não encontrado | Ateline" };
+  if (!bolo) return { title: "Bolo não encontrado" };
+
+  const descricao =
+    `Bolo cenográfico ${bolo.nome}, tema ${bolo.tema}, de ${bolo.andaresMin} a ${bolo.andaresMax} andares. ` +
+    `Aluguel a partir de ${formatarPreco(bolo.menorPrecoLocacao)}` +
+    (bolo.menorPrecoVenda !== null ? ` e compra a partir de ${formatarPreco(bolo.menorPrecoVenda)}` : "") +
+    ". Retirada na Praça Seca, RJ.";
+
+  return {
+    title: bolo.nome,
+    description: descricao,
+    alternates: { canonical: urlCompleta(`/bolo/${bolo.codigo}`) },
+    // Ao definir openGraph aqui, a página substitui o do layout: por isso repetimos a imagem e o nome do site
+    openGraph: {
+      type: "website",
+      locale: "pt_BR",
+      siteName: "Ateline Ateliê",
+      title: `${bolo.nome} | Ateline`,
+      description: descricao,
+      images: [IMAGEM_DE_COMPARTILHAR],
+    },
+  };
 }
 
 export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) {

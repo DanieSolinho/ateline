@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Carrinho } from "@/components/carrinho/Carrinho";
 
 export const metadata: Metadata = {
-  title: "Seu pedido | Ateline",
+  title: "Seu pedido",
+  robots: { index: false }, // página pessoal, fora do Google
 };
 
 export default function CarrinhoPage() {

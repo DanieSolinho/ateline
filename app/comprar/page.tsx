@@ -2,8 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CardBolo } from "@/components/CardBolo";
 import { getVitrine } from "@/lib/catalogo";
+import { urlCompleta } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Comprar | Ateline" };
+export const metadata: Metadata = {
+  title: "Comprar",
+  description:
+    "Compre um bolo cenográfico da Ateline. Retire na loja, na Praça Seca, ou receba por transportadora em todo o Brasil.",
+  alternates: { canonical: urlCompleta("/comprar") },
+};
 
 export default async function ComprarPage() {
   // À venda: peças em bom estado que têm preço de venda na planilha

@@ -3,9 +3,13 @@ import type { Metadata } from "next";
 import { Catalogo } from "@/components/catalogo/Catalogo";
 import { getVitrine } from "@/lib/catalogo";
 import { getReservas } from "@/lib/reservas";
+import { urlCompleta } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "Bolos para alugar | Ateline",
+  title: "Bolos para alugar",
+  description:
+    "Escolha um bolo cenográfico do acervo da Ateline e veja na hora se está livre na data da sua festa. Retirada na Praça Seca, RJ.",
+  alternates: { canonical: urlCompleta("/alugar") },
 };
 
 export default async function AlugarPage() {

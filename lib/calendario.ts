@@ -43,6 +43,14 @@ export function horarioDaLoja(iso: string, momento: "retirada" | "devolucao"): s
   return momento === "retirada" ? "a partir das 14h" : "a partir das 10h";
 }
 
+// Para leitores de tela, começando pelo número que aparece no botão: "2026-10-24" → "24 de outubro, sábado"
+export function rotuloDoDia(iso: string): string {
+  const data = new Date(`${iso}T00:00:00Z`);
+  const formato = (opcoes: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat("pt-BR", { ...opcoes, timeZone: "UTC" }).format(data);
+  return `${data.getUTCDate()} de ${formato({ month: "long" })}, ${formato({ weekday: "long" })}`;
+}
+
 // "sexta-feira, 30/10" → "Sexta-feira, 30/10"
 export function primeiraMaiuscula(texto: string): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);

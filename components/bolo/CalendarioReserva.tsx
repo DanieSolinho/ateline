@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useHoje } from "@/hooks/useHoje";
-import { diaPorExtenso, diasDoMes, nomeDoMes, primeiraMaiuscula } from "@/lib/calendario";
+import { diasDoMes, nomeDoMes, primeiraMaiuscula, rotuloDoDia } from "@/lib/calendario";
 import { calcularPeriodo, estaDisponivel } from "@/lib/periodo";
 import type { Reserva } from "@/types/reserva";
 
@@ -100,7 +100,7 @@ export function CalendarioReserva({ codigo, reservas, festa, aoEscolher }: Props
               type="button"
               disabled={bloqueado}
               aria-pressed={ehFesta}
-              aria-label={`${diaPorExtenso(iso)}${situacao === "reservado" ? ", reservado" : ""}`}
+              aria-label={`${rotuloDoDia(iso)}${situacao === "reservado" ? ", reservado" : ""}`}
               onClick={() => aoEscolher(iso)}
               className={`h-11 rounded-xl font-bold disabled:cursor-not-allowed ${estilo}`}
             >

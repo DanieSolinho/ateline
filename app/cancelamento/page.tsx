@@ -1,7 +1,13 @@
 import type { Metadata } from "next";
 import { PaginaDeTexto } from "@/components/PaginaDeTexto";
+import { urlCompleta } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Política de cancelamento | Ateline" };
+export const metadata: Metadata = {
+  title: "Política de cancelamento",
+  description:
+    "Cancelamento e adiamento de reservas de bolos cenográficos na Ateline.",
+  alternates: { canonical: urlCompleta("/cancelamento") },
+};
 
 export default function CancelamentoPage() {
   return (

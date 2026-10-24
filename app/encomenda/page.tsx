@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import { FormularioEncomenda } from "@/components/encomenda/FormularioEncomenda";
 import { getCupomRefazer, getRefaziveis } from "@/lib/catalogo";
+import { urlCompleta } from "@/lib/site";
 
-export const metadata: Metadata = { title: "Encomende o seu | Ateline" };
+export const metadata: Metadata = {
+  title: "Encomende o seu",
+  description:
+    "Peça um bolo cenográfico novo, com o tema e as cores da sua festa, para alugar ou comprar. Orçamento pelo WhatsApp.",
+  alternates: { canonical: urlCompleta("/encomenda") },
+};
 
 export default async function EncomendaPage() {
   const [refaziveis, cupom] = await Promise.all([getRefaziveis(), getCupomRefazer()]);

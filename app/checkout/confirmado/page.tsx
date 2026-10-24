@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Confirmacao } from "@/components/checkout/Confirmacao";
 
 export const metadata: Metadata = {
-  title: "Reserva confirmada | Ateline",
+  title: "Pedido confirmado",
+  robots: { index: false }, // página pessoal, fora do Google
 };
 
 export default function ConfirmadoPage() {

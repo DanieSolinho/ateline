@@ -24,3 +24,9 @@ body {
   background: #ffffff;
   color: var(--color-ameixa);
 }
+
+/* Contorno bem visível em tudo o que recebe foco pelo teclado */
+:focus-visible {
+  outline: 3px solid var(--color-framboesa);
+  outline-offset: 2px;
+}

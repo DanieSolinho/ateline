@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { FormularioCheckout } from "@/components/checkout/FormularioCheckout";
 
 export const metadata: Metadata = {
-  title: "Finalizar pedido | Ateline",
+  title: "Finalizar pedido",
+  robots: { index: false }, // página pessoal, fora do Google
 };
 
 export default function CheckoutPage() {

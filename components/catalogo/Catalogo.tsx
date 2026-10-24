@@ -98,6 +98,7 @@ export function Catalogo({ bolos, reservas }: { bolos: BoloVitrine[]; reservas: 
         {filtrados.length} {filtrados.length === 1 ? "resultado" : "resultados"}
       </p>
 
+      <h2 className="sr-only">Bolos</h2>
       {filtrados.length > 0 ? (
         <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
           {filtrados.map((bolo) => (

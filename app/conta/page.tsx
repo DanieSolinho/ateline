@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { MinhaConta } from "@/components/conta/MinhaConta";
 
-export const metadata: Metadata = { title: "Minha conta | Ateline" };
+export const metadata: Metadata = {
+  title: "Minha conta",
+  robots: { index: false }, // página pessoal, fora do Google
+};
 
 export default function ContaPage() {
   return (
