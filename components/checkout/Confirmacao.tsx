@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { CircleCheck, MessageCircle } from "lucide-react";
-import { useUltimoPedido } from "@/hooks/useUltimoPedido";
+import { useUltimoPedido } from "@/hooks/usePedidos";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { chaveDoItem } from "@/lib/carrinho";
 import { formatarCep } from "@/lib/cep";
@@ -117,9 +117,14 @@ export function Confirmacao() {
         Versão de demonstração: o pagamento foi simulado. No site oficial, aqui aparece o comprovante do Mercado Pago.
       </p>
 
-      <Link href="/" className="self-start font-bold text-framboesa hover:underline">
-        Voltar para o início
-      </Link>
+      <div className="flex flex-wrap gap-x-6 gap-y-2">
+        <Link href="/conta" className="font-bold text-framboesa hover:underline">
+          Ver meus pedidos
+        </Link>
+        <Link href="/" className="font-bold text-framboesa hover:underline">
+          Voltar para o início
+        </Link>
+      </div>
     </div>
   );
 }

@@ -4,10 +4,11 @@ import { useActionState, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCarrinho } from "@/hooks/useCarrinho";
-import { salvarUltimoPedido } from "@/hooks/useUltimoPedido";
+import { salvarPedido, usePedidos } from "@/hooks/usePedidos";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { alugueisDo, chaveDoItem, comprasDo, resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { buscarCep, cepValido, formatarCep } from "@/lib/cep";
+import { dadosMaisRecentes } from "@/lib/conta";
 import { criarEsquemaCheckout, type CampoCheckout } from "@/lib/checkout";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
@@ -72,7 +73,7 @@ export function FormularioCheckout() {
       return { erros, valores };
     }
 
-    salvarUltimoPedido({
+    salvarPedido({
       numero: `ATL-${Date.now().toString().slice(-6)}`,
       criadoEm: new Date().toISOString(),
       cliente: resultado.data,
@@ -87,7 +88,12 @@ export function FormularioCheckout() {
   }
 
   const [estado, enviar, enviando] = useActionState(finalizar, estadoInicial);
-  const { erros, valores } = estado;
+  const { erros } = estado;
+
+  // Quem já comprou aqui encontra os dados preenchidos (até ela mudar e enviar de novo)
+  const pedidosAnteriores = usePedidos();
+  const valores: Record<string, string | undefined> =
+    Object.keys(estado.valores).length > 0 ? estado.valores : (dadosMaisRecentes(pedidosAnteriores ?? []) ?? {});
 
   if (itens === null) return <p className="mt-6 text-ameixa-suave">Carregando…</p>;
 
