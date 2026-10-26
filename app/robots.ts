@@ -3,10 +3,10 @@ import { urlCompleta } from "@/lib/site";
 
 export const dynamic = "force-static";
 
-// Carrinho, checkout e conta são pessoais: não precisam aparecer no Google
+// Carrinho, checkout, conta e painel são pessoais: não precisam aparecer no Google
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: { userAgent: "*", disallow: ["/carrinho/", "/checkout/", "/conta/"] },
+    rules: { userAgent: "*", disallow: ["/carrinho/", "/checkout/", "/conta/", "/entrar/", "/painel/"] },
     sitemap: urlCompleta("/sitemap.xml").replace(/\/$/, ""),
   };
 }

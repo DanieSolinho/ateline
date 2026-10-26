@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { LogIn, LogOut } from "lucide-react";
+import { LayoutDashboard, LogIn, LogOut } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
+import { useEquipe } from "@/hooks/useEquipe";
 import { sair } from "@/lib/sessao";
 
 // No topo da Minha conta: quem está logada, ou o convite para entrar
 export function CartaoDaConta({ sessao }: { sessao: Session | null | undefined }) {
+  const equipe = useEquipe(sessao?.user.id ?? null);
   if (sessao === undefined) return null; // ainda verificando
 
   if (sessao) {
@@ -15,13 +17,23 @@ export function CartaoDaConta({ sessao }: { sessao: Session | null | undefined }
         <p>
           Você entrou como <strong>{sessao.user.email}</strong>
         </p>
-        <button
-          type="button"
-          onClick={() => sair()}
-          className="flex h-11 items-center gap-2 rounded-xl px-3 font-bold hover:bg-white"
-        >
-          <LogOut size={18} aria-hidden /> Sair
-        </button>
+        <div className="flex flex-wrap gap-2">
+          {equipe && (
+            <Link
+              href="/painel"
+              className="flex h-11 items-center gap-2 rounded-xl bg-ameixa px-4 font-bold text-white hover:opacity-90"
+            >
+              <LayoutDashboard size={18} aria-hidden /> Painel da loja
+            </Link>
+          )}
+          <button
+            type="button"
+            onClick={() => sair()}
+            className="flex h-11 items-center gap-2 rounded-xl px-3 font-bold hover:bg-white"
+          >
+            <LogOut size={18} aria-hidden /> Sair
+          </button>
+        </div>
       </div>
     );
   }
