@@ -3,7 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { MapPin, MessageCircle } from "lucide-react";
+import { CartaoDaConta } from "@/components/conta/CartaoDaConta";
+import { MeusDados } from "@/components/conta/MeusDados";
 import { apagarPedidos, usePedidos } from "@/hooks/usePedidos";
+import { useSessao } from "@/hooks/useSessao";
 import { useHoje } from "@/hooks/useHoje";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
 import { totalDoItem } from "@/lib/carrinho";
@@ -43,6 +46,7 @@ function data(iso: string) {
 export function MinhaConta() {
   const pedidos = usePedidos();
   const hoje = useHoje();
+  const sessao = useSessao();
   const [confirmarApagar, setConfirmarApagar] = useState(false);
 
   if (pedidos === null || hoje === null) return <p className="text-ameixa-suave">Carregando…</p>;
@@ -51,6 +55,9 @@ export function MinhaConta() {
     return (
       <div className="flex flex-col items-start gap-4">
         <h1 className="font-display text-4xl font-bold">Minha conta</h1>
+        <div className="w-full">
+          <CartaoDaConta sessao={sessao} />
+        </div>
         <div className="flex flex-col items-start gap-4 rounded-2xl border border-linha p-8">
           <p className="text-lg">Você ainda não fez nenhum pedido por aqui.</p>
           <p className="text-ameixa-suave">Seus aluguéis e compras aparecem nesta página depois do primeiro pedido.</p>
@@ -61,6 +68,12 @@ export function MinhaConta() {
             Ver bolos para alugar
           </Link>
         </div>
+        {sessao && (
+          <section aria-labelledby="dados-titulo" className="flex w-full flex-col gap-4">
+            <h2 id="dados-titulo" className="font-display text-2xl font-semibold">Meus dados</h2>
+            <MeusDados idDaCliente={sessao.user.id} email={sessao.user.email ?? ""} />
+          </section>
+        )}
       </div>
     );
   }
@@ -82,6 +95,7 @@ export function MinhaConta() {
 
       <div className="flex min-w-0 flex-[999_1_560px] flex-col gap-10">
         <h1 className="font-display text-4xl font-bold">Olá, {cliente.nome.split(" ")[0]}</h1>
+        <CartaoDaConta sessao={sessao} />
 
         <div className="flex flex-wrap gap-5">
           <section
@@ -230,20 +244,27 @@ export function MinhaConta() {
 
         <section id="dados" aria-labelledby="dados-titulo" className="flex scroll-mt-6 flex-col gap-4">
           <h2 id="dados-titulo" className="font-display text-2xl font-semibold">Meus dados</h2>
-          <dl className="grid gap-4 rounded-2xl border border-linha p-5 sm:grid-cols-2">
-            <Dado rotulo="Nome" valor={cliente.nome} />
-            <Dado rotulo="E-mail" valor={cliente.email} />
-            <Dado rotulo="WhatsApp" valor={formatarTelefone(cliente.whatsapp)} />
-            <Dado rotulo="CPF" valor={mascararCpf(cliente.cpf)} />
-            {cliente.chavePix && <Dado rotulo="Chave Pix (devolução da taxa)" valor={cliente.chavePix} />}
-          </dl>
-          <p className="text-sm text-ameixa-suave">
-            Esses dados ficam só neste navegador e preenchem o seu próximo pedido. Para mudar, é só editar no
-            checkout.
-          </p>
+          {sessao ? (
+            // Logada: os dados vêm do Supabase e podem ser editados aqui
+            <MeusDados idDaCliente={sessao.user.id} email={sessao.user.email ?? ""} />
+          ) : (
+            <>
+              <dl className="grid gap-4 rounded-2xl border border-linha p-5 sm:grid-cols-2">
+                <Dado rotulo="Nome" valor={cliente.nome} />
+                <Dado rotulo="E-mail" valor={cliente.email} />
+                <Dado rotulo="WhatsApp" valor={formatarTelefone(cliente.whatsapp)} />
+                <Dado rotulo="CPF" valor={mascararCpf(cliente.cpf)} />
+                {cliente.chavePix && <Dado rotulo="Chave Pix (devolução da taxa)" valor={cliente.chavePix} />}
+              </dl>
+              <p className="text-sm text-ameixa-suave">
+                Esses dados ficam só neste navegador e preenchem o seu próximo pedido. Entre na sua conta para
+                guardá-los com segurança e usar em qualquer aparelho.
+              </p>
+            </>
+          )}
           {confirmarApagar ? (
             <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-[#fce9df] p-4">
-              <span className="font-semibold">Apagar seus pedidos e dados deste navegador?</span>
+              <span className="font-semibold">Apagar os pedidos guardados neste navegador?</span>
               <button
                 type="button"
                 onClick={() => {
@@ -268,7 +289,7 @@ export function MinhaConta() {
               onClick={() => setConfirmarApagar(true)}
               className="self-start font-semibold text-ameixa-suave underline hover:text-alerta"
             >
-              Apagar meus dados deste navegador
+              Apagar os pedidos guardados neste navegador
             </button>
           )}
         </section>

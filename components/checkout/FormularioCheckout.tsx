@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCarrinho } from "@/hooks/useCarrinho";
 import { salvarPedido, usePedidos } from "@/hooks/usePedidos";
+import { usePerfil } from "@/hooks/usePerfil";
+import { useSessao } from "@/hooks/useSessao";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { alugueisDo, chaveDoItem, comprasDo, resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { buscarCep, cepValido, formatarCep } from "@/lib/cep";
 import { dadosMaisRecentes } from "@/lib/conta";
+import { salvarPerfil } from "@/lib/perfil";
 import { criarEsquemaCheckout, type CampoCheckout } from "@/lib/checkout";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
@@ -56,6 +59,11 @@ export function FormularioCheckout() {
     }
   }
 
+  // Logada: os dados da conta (Supabase) têm prioridade sobre os guardados no navegador
+  const pedidosAnteriores = usePedidos();
+  const sessao = useSessao();
+  const { perfil, carregando: carregandoPerfil } = usePerfil(sessao?.user.id ?? null);
+
   // Roda quando a cliente envia o formulário
   async function finalizar(_anterior: Estado, formData: FormData): Promise<Estado> {
     const valores = Object.fromEntries(formData) as Record<string, string>;
@@ -82,6 +90,13 @@ export function FormularioCheckout() {
       naRetirada: resumo.temAluguel ? resumo.naRetirada : 0,
       restanteCompra: resumo.restanteCompras,
     });
+
+    // Logada: guarda os dados na conta para os próximos pedidos (sem fazer a cliente esperar)
+    if (sessao) {
+      const { nome, cpf, whatsapp, chavePix } = resultado.data;
+      void salvarPerfil(sessao.user.id, { nome, cpf, whatsapp, chavePix: chavePix || perfil?.chavePix || "" });
+    }
+
     esvaziar();
     router.push("/checkout/confirmado");
     return estadoInicial;
@@ -91,9 +106,14 @@ export function FormularioCheckout() {
   const { erros } = estado;
 
   // Quem já comprou aqui encontra os dados preenchidos (até ela mudar e enviar de novo)
-  const pedidosAnteriores = usePedidos();
+  // Preenchimento: dados de pedidos anteriores, e-mail do login e dados da conta (estes ganham)
+  const preenchimento: Record<string, string | undefined> = {
+    ...(dadosMaisRecentes(pedidosAnteriores ?? []) ?? {}),
+    ...(sessao?.user.email ? { email: sessao.user.email } : {}),
+    ...Object.fromEntries(Object.entries(perfil ?? {}).filter(([, valor]) => valor !== "")),
+  };
   const valores: Record<string, string | undefined> =
-    Object.keys(estado.valores).length > 0 ? estado.valores : (dadosMaisRecentes(pedidosAnteriores ?? []) ?? {});
+    Object.keys(estado.valores).length > 0 ? estado.valores : preenchimento;
 
   if (itens === null) return <p className="mt-6 text-ameixa-suave">Carregando…</p>;
 
@@ -121,8 +141,21 @@ export function FormularioCheckout() {
           </p>
         )}
 
-        <fieldset className="flex flex-col gap-4 rounded-2xl border border-linha p-5">
+        {/* O "key" refaz os campos quando os dados da conta chegam do Supabase, já preenchidos */}
+        <fieldset
+          key={carregandoPerfil ? "carregando" : "pronto"}
+          className="flex flex-col gap-4 rounded-2xl border border-linha p-5"
+        >
           <legend className="px-2 font-display text-xl font-semibold">Seus dados</legend>
+          {sessao === null && (
+            <p className="text-sm text-ameixa-suave">
+              Já tem conta?{" "}
+              <Link href="/entrar" className="font-bold text-framboesa hover:underline">
+                Entre
+              </Link>{" "}
+              para preencher seus dados automaticamente.
+            </p>
+          )}
           <Campo nome="nome" rotulo="Nome completo" erro={erros.nome}>
             <input id="nome" name="nome" autoComplete="name" defaultValue={valores.nome}
               aria-invalid={!!erros.nome} aria-describedby="nome-erro" className={estiloCampo} />

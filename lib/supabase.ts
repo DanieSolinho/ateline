@@ -10,5 +10,10 @@ if (!url || !chave) {
 }
 
 export const supabase = createClient(url, chave, {
-  auth: { persistSession: false }, // o login entra na etapa 2
+  auth: {
+    persistSession: true, // a cliente continua logada ao fechar e abrir o site
+    detectSessionInUrl: true, // ao voltar pelo link do e-mail, o login é lido do endereço
+    // "implicit": o link do e-mail funciona mesmo se for aberto em outro navegador do celular
+    flowType: "implicit",
+  },
 });
