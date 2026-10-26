@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { CircleCheck, MessageCircle } from "lucide-react";
 import { useUltimoPedido } from "@/hooks/usePedidos";
-import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
+import { diaEHora, diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { chaveDoItem } from "@/lib/carrinho";
 import { formatarCep } from "@/lib/cep";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
 import { mensagemOrcamentoFrete } from "@/lib/frete";
+import { mensagemDoSinal } from "@/lib/pedidos";
 import { calcularPeriodo } from "@/lib/periodo";
 
 function dia(iso: string) {
@@ -35,17 +36,45 @@ export function Confirmacao() {
   const temCompra = pedido.itens.some((item) => item.tipo === "compra");
   const envio = temCompra && cliente.recebimento === "envio";
   const linkFrete = envio ? linkWhatsApp(mensagemOrcamentoFrete(pedido)) : null;
+  const aguardandoSinal = pedido.status === "aguardando_pagamento";
+  const linkSinal = aguardandoSinal ? linkWhatsApp(mensagemDoSinal(pedido, formatarPreco(pedido.pagoAgora))) : null;
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-start gap-3">
         <CircleCheck size={48} className="text-folha" aria-hidden="true" />
-        <h1 className="font-display text-4xl font-bold">Pedido confirmado, {primeiroNome}!</h1>
+        <h1 className="font-display text-4xl font-bold">
+          {aguardandoSinal ? `Pedido recebido, ${primeiroNome}!` : `Pedido confirmado, ${primeiroNome}!`}
+        </h1>
         <p className="text-lg text-ameixa-suave">
           Pedido <strong className="text-ameixa">{pedido.numero}</strong>.{" "}
           {temAluguel ? "O contrato e os detalhes vão" : "Os detalhes vão"} para {cliente.email} e para o seu WhatsApp.
         </p>
       </div>
+
+      {linkSinal && (
+        <section className="flex flex-col items-start gap-3 rounded-2xl border-2 border-framboesa p-5">
+          <h2 className="font-display text-xl font-semibold">Agora, pague o sinal de {formatarPreco(pedido.pagoAgora)}</h2>
+          <p>
+            {pedido.guardadoAte ? (
+              <>
+                Guardamos as peças para você até <strong>{diaEHora(pedido.guardadoAte)}</strong>. Se o sinal não for
+                pago até lá, a reserva é liberada para outras clientes.
+              </>
+            ) : (
+              <>Assim que o sinal for pago, a Ateline confirma o seu pedido.</>
+            )}
+          </p>
+          <a
+            href={linkSinal}
+            target="_blank"
+            rel="noopener"
+            className="flex h-12 items-center gap-2 rounded-xl bg-framboesa px-5 font-bold text-white hover:bg-framboesa-escura"
+          >
+            <MessageCircle size={20} aria-hidden /> Pagar o sinal pelo WhatsApp
+          </a>
+        </section>
+      )}
 
       {linkFrete && (
         <section className="flex flex-col items-start gap-3 rounded-2xl border-2 border-folha p-5">
@@ -94,7 +123,9 @@ export function Confirmacao() {
 
       <dl className="grid gap-3 rounded-2xl bg-blush p-5 sm:grid-cols-2">
         <div>
-          <dt className="text-sm text-ameixa-suave">Sinal pago ({cliente.pagamento === "pix" ? "Pix" : "cartão"})</dt>
+          <dt className="text-sm text-ameixa-suave">
+            {aguardandoSinal ? "Sinal a pagar" : "Sinal pago"} ({cliente.pagamento === "pix" ? "Pix" : "cartão"})
+          </dt>
           <dd className="font-display text-2xl font-bold">{formatarPreco(pedido.pagoAgora)}</dd>
         </div>
         {temAluguel && (
@@ -113,9 +144,6 @@ export function Confirmacao() {
         )}
       </dl>
 
-      <p className="text-sm text-ameixa-suave">
-        Versão de demonstração: o pagamento foi simulado. No site oficial, aqui aparece o comprovante do Mercado Pago.
-      </p>
 
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <Link href="/conta" className="font-bold text-framboesa hover:underline">

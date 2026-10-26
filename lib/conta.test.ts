@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dadosMaisRecentes, historico, proximaRetirada, situacaoDoItem } from "./conta";
+import { dadosMaisRecentes, historico, proximaRetirada, situacaoDoItem, situacaoDoPedido } from "./conta";
 import type { ItemAluguel, ItemCompra } from "@/types/carrinho";
 import type { Pedido } from "@/types/pedido";
 
@@ -84,5 +84,29 @@ describe("dadosMaisRecentes", () => {
       chavePix: "a@a.com",
     });
     expect(dadosMaisRecentes([])).toBeNull();
+  });
+});
+
+describe("situacaoDoPedido", () => {
+  const agora = "2026-10-26T18:00:00.000Z";
+
+  it("aguardando sinal, prazo vencido e cancelado vêm do status do banco", () => {
+    expect(situacaoDoPedido({ status: "aguardando_pagamento", guardadoAte: "2026-10-26T19:00:00.000Z" }, agora)).toBe(
+      "aguardando",
+    );
+    expect(situacaoDoPedido({ status: "aguardando_pagamento", guardadoAte: "2026-10-26T17:00:00.000Z" }, agora)).toBe(
+      "vencido",
+    );
+    expect(situacaoDoPedido({ status: "cancelado" }, agora)).toBe("cancelado");
+  });
+
+  it("pago ou pedido antigo segue pelas datas", () => {
+    expect(situacaoDoPedido({ status: "pago" }, agora)).toBeNull();
+    expect(situacaoDoPedido({}, agora)).toBeNull();
+  });
+
+  it("pedido vencido não aparece como próxima retirada", () => {
+    const vencido = { ...pedido("ATL-9", "2026-10-26T10:00:00Z", [aluguel("2026-11-14")]), status: "aguardando_pagamento" as const, guardadoAte: "2026-10-26T12:00:00Z" };
+    expect(proximaRetirada([vencido], "2026-10-26", agora)).toBeNull();
   });
 });

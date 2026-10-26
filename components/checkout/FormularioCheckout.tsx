@@ -11,6 +11,7 @@ import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { alugueisDo, chaveDoItem, comprasDo, resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { buscarCep, cepValido, formatarCep } from "@/lib/cep";
 import { dadosMaisRecentes } from "@/lib/conta";
+import { enviarPedido } from "@/lib/pedidos";
 import { salvarPerfil } from "@/lib/perfil";
 import { criarEsquemaCheckout, type CampoCheckout } from "@/lib/checkout";
 import { formatarPreco } from "@/lib/formatar";
@@ -20,6 +21,7 @@ import { TAXA_SEGURANCA } from "@/lib/regras";
 type Estado = {
   erros: Partial<Record<CampoCheckout, string>>;
   valores: Record<string, string>;
+  erroDoPedido?: string; // quando o banco recusa (ex.: o bolo acabou de ser reservado por outra pessoa)
 };
 
 const estadoInicial: Estado = { erros: {}, valores: {} };
@@ -81,14 +83,25 @@ export function FormularioCheckout() {
       return { erros, valores };
     }
 
-    salvarPedido({
-      numero: `ATL-${Date.now().toString().slice(-6)}`,
-      criadoEm: new Date().toISOString(),
+    const pedido = {
       cliente: resultado.data,
       itens,
       pagoAgora: resumo.pagarAgora,
       naRetirada: resumo.temAluguel ? resumo.naRetirada : 0,
       restanteCompra: resumo.restanteCompras,
+    };
+
+    // O banco confere a agenda e reserva as peças. Se alguém reservou antes, ele recusa.
+    const resposta = await enviarPedido(pedido);
+    if (!resposta.ok) return { erros: {}, valores, erroDoPedido: resposta.mensagem };
+
+    // Guarda também no navegador, para a confirmação e para quem não tem login
+    salvarPedido({
+      ...pedido,
+      numero: resposta.numero,
+      criadoEm: new Date().toISOString(),
+      status: "aguardando_pagamento",
+      guardadoAte: resposta.guardadoAte,
     });
 
     // Logada: guarda os dados na conta para os próximos pedidos (sem fazer a cliente esperar)
@@ -135,6 +148,11 @@ export function FormularioCheckout() {
   return (
     <form action={enviar} noValidate className="mt-8 grid items-start gap-8 md:grid-cols-[1fr_340px]">
       <div className="flex min-w-0 flex-col gap-6">
+        {estado.erroDoPedido && (
+          <p role="alert" className="rounded-xl bg-[#fce9df] px-4 py-3 font-semibold text-alerta">
+            {estado.erroDoPedido}
+          </p>
+        )}
         {Object.keys(erros).length > 0 && (
           <p role="alert" className="rounded-xl bg-[#fce9df] px-4 py-3 font-semibold text-alerta">
             Confira os campos marcados abaixo.
@@ -329,7 +347,7 @@ export function FormularioCheckout() {
         )}
 
         <fieldset className="flex flex-col gap-3 rounded-2xl border border-linha p-5">
-          <legend className="px-2 font-display text-xl font-semibold">Pagamento</legend>
+          <legend className="px-2 font-display text-xl font-semibold">Como você prefere pagar o sinal?</legend>
           <div className="grid grid-cols-2 gap-3">
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-ameixa/30 p-4 font-bold has-checked:border-2 has-checked:border-framboesa">
               <input type="radio" name="pagamento" value="pix" defaultChecked={valores.pagamento !== "cartao"} className="size-5 accent-framboesa" />
@@ -390,10 +408,11 @@ export function FormularioCheckout() {
         )}
         <button type="submit" disabled={enviando}
           className="mt-2 h-14 rounded-xl bg-framboesa text-lg font-bold text-white hover:bg-framboesa-escura disabled:opacity-60">
-          {enviando ? "Enviando…" : `Pagar ${formatarPreco(resumo.pagarAgora)}`}
+          {enviando ? "Reservando…" : "Finalizar pedido"}
         </button>
         <p className="text-xs text-ameixa-suave">
-          Versão de demonstração: o pagamento ainda é simulado. Nenhum valor é cobrado.
+          As peças ficam guardadas por 2 horas enquanto você paga o sinal pelo WhatsApp. Em breve, o pagamento será
+          direto pelo Mercado Pago.
         </p>
       </aside>
     </form>

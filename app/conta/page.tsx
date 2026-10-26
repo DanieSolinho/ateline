@@ -11,7 +11,7 @@ export default function ContaPage() {
     <main className="mx-auto w-full max-w-7xl px-4 py-10">
       <MinhaConta />
       <p className="mt-12 text-sm text-ameixa-suave">
-        Versão de demonstração: sem login, os pedidos ficam guardados neste navegador.
+        Sem login, os pedidos ficam guardados só neste navegador. Entre na sua conta para vê-los em qualquer aparelho.
       </p>
     </main>
   );

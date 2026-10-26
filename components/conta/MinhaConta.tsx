@@ -6,11 +6,20 @@ import { MapPin, MessageCircle } from "lucide-react";
 import { CartaoDaConta } from "@/components/conta/CartaoDaConta";
 import { MeusDados } from "@/components/conta/MeusDados";
 import { apagarPedidos, usePedidos } from "@/hooks/usePedidos";
+import { useMeusPedidos } from "@/hooks/useMeusPedidos";
 import { useSessao } from "@/hooks/useSessao";
 import { useHoje } from "@/hooks/useHoje";
-import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
+import { diaEHora, diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
 import { totalDoItem } from "@/lib/carrinho";
-import { dadosMaisRecentes, historico, NOME_DA_SITUACAO, proximaRetirada, type Situacao } from "@/lib/conta";
+import {
+  dadosMaisRecentes,
+  historico,
+  NOME_DA_SITUACAO,
+  proximaRetirada,
+  situacaoDoPedido,
+  type Situacao,
+} from "@/lib/conta";
+import { mensagemDoSinal } from "@/lib/pedidos";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
 import { PERCENTUAL_SINAL, TAXA_SEGURANCA } from "@/lib/regras";
@@ -25,6 +34,9 @@ const COR_DA_SITUACAO: Record<Situacao, string> = {
   "com-voce": "bg-pessego text-ameixa",
   devolucao: "bg-[#fce9df] text-alerta",
   concluido: "bg-[#f1ecee] text-ameixa-suave",
+  aguardando: "bg-pessego text-ameixa",
+  vencido: "bg-[#f1ecee] text-ameixa-suave",
+  cancelado: "bg-[#f1ecee] text-ameixa-suave",
 };
 
 const SECOES = [
@@ -44,12 +56,19 @@ function data(iso: string) {
 }
 
 export function MinhaConta() {
-  const pedidos = usePedidos();
   const hoje = useHoje();
   const sessao = useSessao();
+  const [agora] = useState(() => new Date().toISOString()); // para saber se o prazo do sinal venceu
   const [confirmarApagar, setConfirmarApagar] = useState(false);
 
-  if (pedidos === null || hoje === null) return <p className="text-ameixa-suave">Carregando…</p>;
+  // Logada: pedidos do Supabase. Sem login: os guardados neste navegador.
+  const locais = usePedidos();
+  const doBanco = useMeusPedidos(sessao?.user.id ?? null);
+  const pedidos = sessao ? (doBanco.pedidos ?? []) : locais;
+
+  if (pedidos === null || hoje === null || sessao === undefined || doBanco.carregando) {
+    return <p className="text-ameixa-suave">Carregando…</p>;
+  }
 
   if (pedidos.length === 0) {
     return (
@@ -79,8 +98,9 @@ export function MinhaConta() {
   }
 
   const cliente = dadosMaisRecentes(pedidos)!;
-  const proxima = proximaRetirada(pedidos, hoje);
-  const linhas = historico(pedidos, hoje);
+  const proxima = proximaRetirada(pedidos, hoje, agora);
+  const linhas = historico(pedidos, hoje, agora);
+  const proximaAguardando = proxima && situacaoDoPedido(proxima.pedido, agora) === "aguardando";
   const pedidosComAluguel = pedidos.filter((pedido) => pedido.itens.some((item) => item.tipo === "aluguel"));
 
   return (
@@ -106,9 +126,15 @@ export function MinhaConta() {
               <>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h2 id="proxima-titulo" className="font-display text-xl font-semibold">Próxima retirada</h2>
-                  <span className="rounded-full bg-[#e6f2ea] px-3 py-1 text-xs font-bold text-folha">
-                    Reservado · sinal pago
-                  </span>
+                  {proximaAguardando ? (
+                    <span className="rounded-full bg-pessego px-3 py-1 text-xs font-bold text-ameixa">
+                      Aguardando o sinal
+                    </span>
+                  ) : (
+                    <span className="rounded-full bg-[#e6f2ea] px-3 py-1 text-xs font-bold text-folha">
+                      Reservado · sinal pago
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-4">
                   <div aria-hidden="true" className="h-30 w-24 shrink-0 rounded-xl bg-rosa" />
@@ -129,6 +155,21 @@ export function MinhaConta() {
                     </span>
                   </div>
                 </div>
+                {proximaAguardando && (
+                  <p className="rounded-xl bg-pessego/60 p-3 text-sm">
+                    Pague o sinal de <strong>{formatarPreco(proxima.pedido.pagoAgora)}</strong>
+                    {proxima.pedido.guardadoAte && <> até {diaEHora(proxima.pedido.guardadoAte)}</>} para garantir a
+                    reserva.{" "}
+                    <a
+                      href={linkWhatsApp(mensagemDoSinal(proxima.pedido, formatarPreco(proxima.pedido.pagoAgora))) ?? "#"}
+                      target="_blank"
+                      rel="noopener"
+                      className="font-bold text-framboesa underline"
+                    >
+                      Pagar pelo WhatsApp
+                    </a>
+                  </p>
+                )}
                 <div className="flex flex-wrap gap-3">
                   <a
                     href={MAPA_DA_LOJA}
@@ -262,35 +303,39 @@ export function MinhaConta() {
               </p>
             </>
           )}
-          {confirmarApagar ? (
-            <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-[#fce9df] p-4">
-              <span className="font-semibold">Apagar os pedidos guardados neste navegador?</span>
-              <button
-                type="button"
-                onClick={() => {
-                  apagarPedidos();
-                  setConfirmarApagar(false);
-                }}
-                className="h-11 rounded-xl bg-alerta px-4 font-bold text-white"
-              >
-                Sim, apagar
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmarApagar(false)}
-                className="h-11 rounded-xl px-4 font-bold underline"
-              >
-                Cancelar
-              </button>
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setConfirmarApagar(true)}
-              className="self-start font-semibold text-ameixa-suave underline hover:text-alerta"
-            >
-              Apagar os pedidos guardados neste navegador
-            </button>
+          {!sessao && (
+            <>
+              {confirmarApagar ? (
+                <div role="alert" className="flex flex-wrap items-center gap-3 rounded-xl bg-[#fce9df] p-4">
+                  <span className="font-semibold">Apagar os pedidos guardados neste navegador?</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      apagarPedidos();
+                      setConfirmarApagar(false);
+                    }}
+                    className="h-11 rounded-xl bg-alerta px-4 font-bold text-white"
+                  >
+                    Sim, apagar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmarApagar(false)}
+                    className="h-11 rounded-xl px-4 font-bold underline"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmarApagar(true)}
+                  className="self-start font-semibold text-ameixa-suave underline hover:text-alerta"
+                >
+                  Apagar os pedidos guardados neste navegador
+                </button>
+              )}
+            </>
           )}
         </section>
       </div>

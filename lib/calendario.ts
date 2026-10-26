@@ -55,3 +55,11 @@ export function rotuloDoDia(iso: string): string {
 export function primeiraMaiuscula(texto: string): string {
   return texto.charAt(0).toUpperCase() + texto.slice(1);
 }
+
+// "2026-10-26T19:07:00Z" → "26/10, às 16:07" (no horário de quem está vendo)
+export function diaEHora(isoComHora: string): string {
+  const data = new Date(isoComHora);
+  const dia = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(data);
+  const hora = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(data);
+  return `${dia}, às ${hora}`;
+}
