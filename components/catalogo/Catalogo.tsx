@@ -7,6 +7,7 @@ import { CardBolo } from "@/components/CardBolo";
 import { calcularPeriodo, estaDisponivel } from "@/lib/periodo";
 import type { BoloVitrine } from "@/types/catalogo";
 import type { Reserva } from "@/types/reserva";
+import { useReservas } from "@/hooks/useReservas";
 
 // "2026-10-25" → "25/10/2026"
 function formatarData(iso: string) {
@@ -20,7 +21,8 @@ function diaMes(iso: string) {
   return `${dia}/${mes}`;
 }
 
-export function Catalogo({ bolos, reservas }: { bolos: BoloVitrine[]; reservas: Reserva[] }) {
+export function Catalogo({ bolos, reservas: daPublicacao }: { bolos: BoloVitrine[]; reservas: Reserva[] }) {
+  const reservas = useReservas(daPublicacao); // agenda atualizada do Supabase
   const searchParams = useSearchParams();
   const dataNaUrl = searchParams.get("data");
   // Só aceita datas no formato certo, para ninguém quebrar a página editando o endereço

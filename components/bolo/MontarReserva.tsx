@@ -7,6 +7,7 @@ import { Store, Truck } from "lucide-react";
 import { CalendarioReserva } from "@/components/bolo/CalendarioReserva";
 import { useCarrinho } from "@/hooks/useCarrinho";
 import { useHoje } from "@/hooks/useHoje";
+import { useReservas } from "@/hooks/useReservas";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
@@ -19,7 +20,7 @@ type Props = {
   bolo: BoloVitrine;
   topos: Acessorio[]; // só os topos compatíveis com este bolo
   bases: Acessorio[]; // as unidades de base dourada
-  reservas: Reserva[];
+  reservas: Reserva[]; // agenda do momento da publicação
 };
 
 const estiloChip = (ativo: boolean) =>
@@ -31,7 +32,8 @@ const estiloChip = (ativo: boolean) =>
 const semMudancas = () => () => {};
 const veioParaComprar = () => window.location.hash === "#comprar";
 
-export function MontarReserva({ bolo, topos, bases, reservas }: Props) {
+export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao }: Props) {
+  const reservas = useReservas(daPublicacao); // agenda atualizada do Supabase
   const router = useRouter();
   const { adicionar } = useCarrinho();
 
