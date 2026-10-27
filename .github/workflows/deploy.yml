@@ -33,6 +33,9 @@ jobs:
         with:
           path: out
 
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

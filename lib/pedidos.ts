@@ -14,7 +14,12 @@ export function mensagemDeErroDoPedido(erro: string, itens: ItemCarrinho[]): str
   const ocupada = erro.match(/PECA_RESERVADA:([A-Z0-9_]+)/)?.[1];
   if (ocupada) {
     for (const item of itens) {
-      if (item.tipo !== "aluguel") continue;
+      if (item.tipo === "compra") {
+        if (item.codigoBolo === ocupada) {
+          return `O bolo ${item.nome} acabou de ser vendido ou tem aluguel marcado. Remova-o do carrinho e escolha outro.`;
+        }
+        continue;
+      }
       if (item.codigoBolo === ocupada) {
         return `O bolo ${item.nome} acabou de ser reservado por outra pessoa nessa data. Volte ao bolo e escolha outra data.`;
       }

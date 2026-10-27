@@ -20,6 +20,8 @@ describe("mensagemDeErroDoPedido", () => {
     expect(mensagemDeErroDoPedido("PECA_RESERVADA:SAFARI_001", [safari])).toContain("O bolo Safari · 3 andares");
     expect(mensagemDeErroDoPedido("PECA_RESERVADA:TOPO_001", [safari])).toContain("O topo Coroa dourada");
     expect(mensagemDeErroDoPedido("PECA_RESERVADA:BASE_DOURADA_002", [safari])).toContain("base dourada");
+    const compra = { tipo: "compra" as const, codigoBolo: "CIRCO_001", codigoOpcao: "C", nome: "Circo", preco: 400, personalizacao: null };
+    expect(mensagemDeErroDoPedido("PECA_RESERVADA:CIRCO_001", [compra])).toContain("acabou de ser vendido");
   });
 
   it("tem mensagem para os outros erros", () => {

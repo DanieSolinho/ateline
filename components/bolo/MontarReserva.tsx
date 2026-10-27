@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Store, Truck } from "lucide-react";
 import { CalendarioReserva } from "@/components/bolo/CalendarioReserva";
+import { LivresNaData } from "@/components/bolo/LivresNaData";
 import { useCarrinho } from "@/hooks/useCarrinho";
 import { useHoje } from "@/hooks/useHoje";
 import { useReservas } from "@/hooks/useReservas";
+import { useVendidos } from "@/hooks/useVendidos";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
+import { festaDoEndereco } from "@/lib/alternativas";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo, estaDisponivel, livreParaVenda, primeiraUnidadeLivre } from "@/lib/periodo";
@@ -21,6 +24,8 @@ type Props = {
   topos: Acessorio[]; // só os topos compatíveis com este bolo
   bases: Acessorio[]; // as unidades de base dourada
   reservas: Reserva[]; // agenda do momento da publicação
+  outros: BoloVitrine[]; // os outros bolos do site, para sugerir quando a data estiver ocupada
+  vendidos: string[]; // peças vendidas no momento da publicação
 };
 
 const estiloChip = (ativo: boolean) =>
@@ -31,9 +36,12 @@ const estiloChip = (ativo: boolean) =>
 // Quem chega pela página "Comprar" vem com #comprar no endereço e já cai na aba de compra
 const semMudancas = () => () => {};
 const veioParaComprar = () => window.location.hash === "#comprar";
+const lerBuscaDoEndereco = () => window.location.search; // ex.: "?festa=2026-11-21"
 
-export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao }: Props) {
+export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao, outros: todosOsOutros, vendidos: vendidosDaPublicacao }: Props) {
   const reservas = useReservas(daPublicacao); // agenda atualizada do Supabase
+  const vendidos = useVendidos(vendidosDaPublicacao);
+  const outros = todosOsOutros.filter((outro) => !vendidos.includes(outro.codigo));
   const router = useRouter();
   const { adicionar } = useCarrinho();
 
@@ -45,11 +53,21 @@ export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao }: Pr
   const [andares, setAndares] = useState(bolo.opcoes[0].andares);
   const [codigoTopo, setCodigoTopo] = useState("");
   const [querBase, setQuerBase] = useState(false);
-  const [festa, setFesta] = useState<string | null>(null);
+  const [festaEscolhida, setFesta] = useState<string | null>(null);
+  const [dataOcupada, setDataOcupada] = useState<string | null>(null);
+  const buscaDoEndereco = useSyncExternalStore(semMudancas, lerBuscaDoEndereco, () => "");
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
   const [inicial, setInicial] = useState("");
   const [erro, setErro] = useState("");
+
+  // A data da festa: a que a cliente tocou no calendário ou, se ainda não tocou,
+  // a que veio no link ("Livres na sua data" de outro bolo), desde que esteja livre
+  const festaDoLink = festaDoEndereco(buscaDoEndereco);
+  const linkValido =
+    festaDoLink !== null && hoje !== null && calcularPeriodo(festaDoLink).retirada > hoje &&
+    estaDisponivel(bolo.codigo, festaDoLink, reservas);
+  const festa = festaEscolhida ?? (linkValido ? festaDoLink : null);
 
   // A opção escolhida = decoração + número de andares
   const opcoesDaDecoracao = bolo.opcoes.filter((opcao) => opcao.decoracao === decoracao);
@@ -124,6 +142,27 @@ export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao }: Pr
       personalizacao: personalizacao.texto,
     });
     router.push("/carrinho");
+  }
+
+  // Bolo vendido: sai do aluguel e da venda
+  if (vendidos.includes(bolo.codigo)) {
+    return (
+      <div className="flex flex-col items-start gap-3 rounded-2xl bg-blush p-5">
+        <p className="font-display text-xl font-semibold">Este bolo foi vendido</p>
+        <p className="text-ameixa-suave">Ele não está mais disponível para aluguel nem para compra.</p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href="/encomenda"
+            className="grid h-12 place-items-center rounded-xl bg-framboesa px-5 font-bold text-white hover:bg-framboesa-escura"
+          >
+            Encomendar um igual
+          </Link>
+          <Link href="/alugar" className="grid h-12 place-items-center rounded-xl border-2 border-ameixa px-5 font-bold hover:bg-white">
+            Ver outros bolos
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -302,8 +341,20 @@ export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao }: Pr
             </label>
           )}
 
-          <CalendarioReserva codigo={bolo.codigo} reservas={reservas} festa={festa}
-            aoEscolher={(iso) => { setFesta(iso); setErro(""); }} />
+          <CalendarioReserva
+            codigo={bolo.codigo}
+            reservas={reservas}
+            festa={festa}
+            aoEscolher={(iso) => {
+              setFesta(iso);
+              setDataOcupada(null);
+              setErro("");
+            }}
+            ocupada={dataOcupada}
+            aoEscolherOcupada={setDataOcupada}
+          />
+
+          {dataOcupada && <LivresNaData festa={dataOcupada} escolhido={bolo} outros={outros} reservas={reservas} />}
 
           <section aria-live="polite" className="flex flex-col gap-3 rounded-2xl bg-blush p-5">
             {periodo && (

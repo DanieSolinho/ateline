@@ -5,6 +5,7 @@ import { MontarReserva } from "@/components/bolo/MontarReserva";
 import { getBases, getBoloDaVitrine, getTopos, getVitrine } from "@/lib/catalogo";
 import { formatarPreco } from "@/lib/formatar";
 import { getReservas } from "@/lib/reservas";
+import { getVendidos } from "@/lib/vendas";
 import { IMAGEM_DE_COMPARTILHAR, urlCompleta } from "@/lib/site";
 
 // O site é estático: geramos uma página para cada bolo da vitrine na hora de publicar
@@ -48,11 +49,14 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
   const bolo = await getBoloDaVitrine(codigo);
   if (!bolo) notFound();
 
-  const [topos, bases, reservas] = await Promise.all([
+  const [topos, bases, reservas, vitrine, vendidos] = await Promise.all([
     getTopos(bolo.toposCompativeis),
     getBases(),
     getReservas(),
+    getVitrine(),
+    getVendidos(),
   ]);
+  const outros = vitrine.filter((outro) => outro.codigo !== bolo.codigo);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8">
@@ -74,7 +78,7 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
             </p>
           </div>
 
-          <MontarReserva bolo={bolo} topos={topos} bases={bases} reservas={reservas} />
+          <MontarReserva bolo={bolo} topos={topos} bases={bases} reservas={reservas} outros={outros} vendidos={vendidos} />
 
           <section className="flex flex-col gap-2 border-t border-linha pt-6">
             <h2 className="font-display text-lg font-semibold">Cuidados com a peça alugada</h2>
