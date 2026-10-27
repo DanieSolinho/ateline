@@ -28,6 +28,10 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: out
+        - run: npm run sincronizar
+        env:
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+
 
   deploy:
     needs: build

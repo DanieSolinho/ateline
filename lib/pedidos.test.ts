@@ -24,6 +24,8 @@ describe("mensagemDeErroDoPedido", () => {
 
   it("tem mensagem para os outros erros", () => {
     expect(mensagemDeErroDoPedido("DATA_INVALIDA", [safari])).toContain("já passou");
+    expect(mensagemDeErroDoPedido("PRECO_DESATUALIZADO", [safari])).toContain("Recarregue");
+    expect(mensagemDeErroDoPedido("ITEM_INDISPONIVEL:SAFARI_001", [safari])).toContain("não está mais disponível");
     expect(mensagemDeErroDoPedido("Failed to fetch", [safari])).toContain("internet");
   });
 });

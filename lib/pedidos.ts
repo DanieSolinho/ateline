@@ -27,6 +27,12 @@ export function mensagemDeErroDoPedido(erro: string, itens: ItemCarrinho[]): str
     }
     return "Uma das peças acabou de ser reservada por outra pessoa. Volte ao bolo e escolha outra data.";
   }
+  if (erro.includes("PRECO_DESATUALIZADO")) {
+    return "Os preços foram atualizados enquanto a página estava aberta. Recarregue a página e confira o carrinho.";
+  }
+  if (erro.includes("ITEM_INDISPONIVEL")) {
+    return "Um dos itens do carrinho não está mais disponível. Remova-o e escolha outro.";
+  }
   if (erro.includes("DATA_INVALIDA")) return "A data da festa já passou. Volte ao bolo e escolha outra data.";
   if (erro.includes("PEDIDO_VAZIO")) return "Seu pedido está vazio.";
   return "Não conseguimos registrar seu pedido agora. Confira sua internet e tente de novo.";
