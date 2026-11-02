@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { AbaLembretes } from "@/components/painel/AbaLembretes";
+import { AbaListaDeEspera } from "@/components/painel/AbaListaDeEspera";
+import { AbaRelatorios } from "@/components/painel/AbaRelatorios";
 import { CartaoDevolucao } from "@/components/painel/CartaoDevolucao";
 import { CartaoSaida } from "@/components/painel/CartaoSaida";
 import { ListaAguardando } from "@/components/painel/ListaAguardando";
@@ -50,7 +53,66 @@ export function Painel() {
     );
   }
 
-  return <PainelDaEquipe hoje={hoje} />;
+  return <PainelComAbas hoje={hoje} />;
+}
+
+const ABAS = [
+  { id: "agenda", nome: "Agenda" },
+  { id: "espera", nome: "Lista de espera" },
+  { id: "lembretes", nome: "Lembretes" },
+  { id: "relatorios", nome: "Relatórios" },
+] as const;
+type Aba = (typeof ABAS)[number]["id"];
+
+function PainelComAbas({ hoje }: { hoje: string }) {
+  const [aba, setAba] = useState<Aba>("agenda");
+
+  // Setas do teclado trocam de aba, como em qualquer sistema de abas
+  function aoTeclar(evento: React.KeyboardEvent<HTMLDivElement>) {
+    const atual = ABAS.findIndex((a) => a.id === aba);
+    let proxima = atual;
+    if (evento.key === "ArrowRight") proxima = (atual + 1) % ABAS.length;
+    if (evento.key === "ArrowLeft") proxima = (atual - 1 + ABAS.length) % ABAS.length;
+    if (proxima === atual) return;
+    setAba(ABAS[proxima].id);
+    document.getElementById(`aba-${ABAS[proxima].id}`)?.focus();
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h1 className="font-display text-3xl font-bold">Painel da loja</h1>
+      <div
+        role="tablist"
+        aria-label="Painel da loja"
+        onKeyDown={aoTeclar}
+        className="flex flex-wrap gap-1 rounded-2xl bg-blush p-1"
+      >
+        {ABAS.map((item) => (
+          <button
+            key={item.id}
+            id={`aba-${item.id}`}
+            type="button"
+            role="tab"
+            aria-selected={aba === item.id}
+            aria-controls={`painel-${item.id}`}
+            tabIndex={aba === item.id ? 0 : -1}
+            onClick={() => setAba(item.id)}
+            className={`min-h-11 flex-1 rounded-xl px-4 font-bold ${
+              aba === item.id ? "bg-white shadow-sm" : "text-ameixa-suave hover:text-ameixa"
+            }`}
+          >
+            {item.nome}
+          </button>
+        ))}
+      </div>
+      <div role="tabpanel" id={`painel-${aba}`} aria-labelledby={`aba-${aba}`}>
+        {aba === "agenda" && <PainelDaEquipe hoje={hoje} />}
+        {aba === "espera" && <AbaListaDeEspera />}
+        {aba === "lembretes" && <AbaLembretes hoje={hoje} />}
+        {aba === "relatorios" && <AbaRelatorios />}
+      </div>
+    </div>
+  );
 }
 
 function PainelDaEquipe({ hoje }: { hoje: string }) {
@@ -78,7 +140,7 @@ function PainelDaEquipe({ hoje }: { hoje: string }) {
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-3xl font-bold">{dia === hoje ? "Agenda de hoje" : "Agenda"}</h1>
+          <h2 className="font-display text-2xl font-bold">{dia === hoje ? "Agenda de hoje" : "Agenda"}</h2>
           <p className="text-ameixa-suave">
             {primeiraMaiuscula(diaPorExtenso(dia))} ·{" "}
             {fechada

@@ -77,3 +77,16 @@ export async function getRefaziveis(): Promise<BoloRefazivel[]> {
 export async function getCupomRefazer(): Promise<Cupom | null> {
   return catalogo.cupomRefazer;
 }
+
+// O nome de uma peça pelo código (bolo, topo ou base), para o painel e os relatórios
+export function nomeDaPeca(codigo: string, dadosDoCatalogo: Catalogo = catalogo): string {
+  const bolo = dadosDoCatalogo.bolos.find((b) => b.codigo === codigo);
+  if (bolo) return bolo.nome;
+  const acessorio = [...dadosDoCatalogo.topos, ...dadosDoCatalogo.bases].find((a) => a.codigo === codigo);
+  return acessorio?.nome ?? codigo;
+}
+
+// O código é de um bolo (e não de um topo ou base)?
+export function eBolo(codigo: string, dadosDoCatalogo: Catalogo = catalogo): boolean {
+  return dadosDoCatalogo.bolos.some((b) => b.codigo === codigo);
+}

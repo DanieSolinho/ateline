@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CalendarX } from "lucide-react";
+import { AvisarSeLiberar } from "@/components/bolo/AvisarSeLiberar";
 import { bolosLivresNaData } from "@/lib/alternativas";
 import { diaPorExtenso } from "@/lib/calendario";
 import { formatarPreco } from "@/lib/formatar";
@@ -24,9 +25,11 @@ export function LivresNaData({ festa, escolhido, outros, reservas }: Props) {
         <CalendarX size={20} aria-hidden /> O {escolhido.nome} já está reservado em {dia}
       </h3>
 
+      <AvisarSeLiberar key={festa} codigo={escolhido.codigo} festa={festa} nomeDoBolo={escolhido.nome} />
+
       {livres.length > 0 ? (
         <>
-          <p>Estes bolos estão livres nessa data:</p>
+          <p>Ou escolha um destes, que estão livres nessa data:</p>
           <ul className="grid gap-2 sm:grid-cols-2">
             {livres.map((bolo) => (
               <li key={bolo.codigo}>
