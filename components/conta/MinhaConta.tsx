@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { MapPin, MessageCircle } from "lucide-react";
+import { CalendarClock, MapPin, MessageCircle } from "lucide-react";
 import { CartaoDaConta } from "@/components/conta/CartaoDaConta";
 import { MeusDados } from "@/components/conta/MeusDados";
+import { MinhasReservas } from "@/components/conta/MinhasReservas";
 import { apagarPedidos, usePedidos } from "@/hooks/usePedidos";
 import { useMeusPedidos } from "@/hooks/useMeusPedidos";
+import { useMeuCredito } from "@/hooks/useMeuCredito";
 import { useSessao } from "@/hooks/useSessao";
 import { useHoje } from "@/hooks/useHoje";
 import { diaEHora, diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
@@ -22,7 +24,7 @@ import {
 import { mensagemDoSinal } from "@/lib/pedidos";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
-import { PERCENTUAL_SINAL, TAXA_SEGURANCA } from "@/lib/regras";
+import { ANTECEDENCIA_ADIAMENTO_DIAS, PERCENTUAL_SINAL, TAXA_SEGURANCA, VALIDADE_CREDITO_MESES } from "@/lib/regras";
 
 const MAPA_DA_LOJA =
   "https://www.google.com/maps/search/?api=1&query=" +
@@ -40,6 +42,7 @@ const COR_DA_SITUACAO: Record<Situacao, string> = {
 };
 
 const SECOES = [
+  { id: "reservas", nome: "Adiar ou cancelar", soLogada: true },
   { id: "pedidos", nome: "Meus pedidos" },
   { id: "credito", nome: "Crédito em loja" },
   { id: "contratos", nome: "Contratos" },
@@ -65,6 +68,14 @@ export function MinhaConta() {
   const locais = usePedidos();
   const doBanco = useMeusPedidos(sessao?.user.id ?? null);
   const pedidos = sessao ? (doBanco.pedidos ?? []) : locais;
+  const [versaoDoCredito, setVersaoDoCredito] = useState(0);
+  const credito = useMeuCredito(sessao?.user.id ?? null, versaoDoCredito);
+
+  // Depois de adiar ou cancelar: busca de novo os pedidos e o saldo
+  function aoMudar() {
+    doBanco.recarregar();
+    setVersaoDoCredito((atual) => atual + 1);
+  }
 
   if (pedidos === null || hoje === null || sessao === undefined || doBanco.carregando) {
     return <p className="text-ameixa-suave">Carregando…</p>;
@@ -106,7 +117,7 @@ export function MinhaConta() {
   return (
     <div className="flex flex-wrap items-start gap-10">
       <nav aria-label="Minha conta" className="flex w-full flex-col gap-1 md:sticky md:top-4 md:w-56">
-        {SECOES.map((secao) => (
+        {SECOES.filter((secao) => sessao || !secao.soLogada).map((secao) => (
           <a key={secao.id} href={`#${secao.id}`} className="rounded-xl px-4 py-3 font-semibold hover:bg-blush">
             {secao.nome}
           </a>
@@ -179,21 +190,31 @@ export function MinhaConta() {
                   >
                     <MapPin size={18} aria-hidden /> Como chegar
                   </a>
-                  <a
-                    href={
-                      linkWhatsApp(
-                        `Olá! Quero pedir o adiamento do pedido ${proxima.pedido.numero} (${proxima.item.nome}, festa em ${data(proxima.item.festa)}).`,
-                      ) ?? "#"
-                    }
-                    target="_blank"
-                    rel="noopener"
-                    className="flex h-11 items-center gap-2 rounded-xl px-4 font-bold underline hover:bg-blush"
-                  >
-                    <MessageCircle size={18} aria-hidden /> Pedir adiamento
-                  </a>
+                  {sessao ? (
+                    <a
+                      href="#reservas"
+                      className="flex h-11 items-center gap-2 rounded-xl px-4 font-bold underline hover:bg-blush"
+                    >
+                      <CalendarClock size={18} aria-hidden /> Adiar ou cancelar
+                    </a>
+                  ) : (
+                    <a
+                      href={
+                        linkWhatsApp(
+                          `Olá! Quero pedir o adiamento do pedido ${proxima.pedido.numero} (${proxima.item.nome}, festa em ${data(proxima.item.festa)}).`,
+                        ) ?? "#"
+                      }
+                      target="_blank"
+                      rel="noopener"
+                      className="flex h-11 items-center gap-2 rounded-xl px-4 font-bold underline hover:bg-blush"
+                    >
+                      <MessageCircle size={18} aria-hidden /> Pedir adiamento
+                    </a>
+                  )}
                 </div>
                 <p className="text-sm text-ameixa-suave">
-                  Adiamento: com pelo menos 15 dias de antecedência e se o bolo estiver livre na nova data.
+                  Adiamento: com pelo menos {ANTECEDENCIA_ADIAMENTO_DIAS} dias de antecedência e se o bolo estiver livre
+                  na nova data.
                 </p>
               </>
             ) : (
@@ -213,12 +234,32 @@ export function MinhaConta() {
             className="flex min-w-0 flex-[1_1_240px] scroll-mt-6 flex-col gap-2 rounded-2xl bg-blush p-6"
           >
             <h2 id="credito-titulo" className="font-display text-xl font-semibold">Crédito em loja</h2>
-            <span className="font-display text-3xl font-bold">{formatarPreco(0)}</span>
-            <p className="text-sm text-ameixa-suave">
-              Em caso de cancelamento, o valor vira crédito por 3 meses. O saldo aparece aqui em breve.
-            </p>
+            {!sessao ? (
+              <p className="text-sm text-ameixa-suave">
+                Em caso de cancelamento, o sinal vira crédito por {VALIDADE_CREDITO_MESES} meses. Entre na sua conta
+                para ver e usar o seu saldo.
+              </p>
+            ) : credito === null ? (
+              <p className="text-ameixa-suave">Carregando…</p>
+            ) : (
+              <>
+                <span className="font-display text-3xl font-bold">{formatarPreco(credito.saldo)}</span>
+                <p className="text-sm text-ameixa-suave">
+                  {credito.saldo > 0 && credito.venceEm
+                    ? `Use no checkout para pagar o sinal de um novo pedido. Vale até ${data(credito.venceEm.slice(0, 10))}.`
+                    : `Em caso de cancelamento, o sinal vira crédito por ${VALIDADE_CREDITO_MESES} meses.`}
+                </p>
+              </>
+            )}
           </section>
         </div>
+
+        {sessao && (
+          <section id="reservas" aria-labelledby="reservas-titulo" className="flex scroll-mt-6 flex-col gap-4">
+            <h2 id="reservas-titulo" className="font-display text-2xl font-semibold">Adiar ou cancelar</h2>
+            <MinhasReservas pedidos={pedidos} hoje={hoje} agora={agora} aoMudar={aoMudar} />
+          </section>
+        )}
 
         <section id="pedidos" aria-labelledby="pedidos-titulo" className="flex scroll-mt-6 flex-col gap-4">
           <h2 id="pedidos-titulo" className="font-display text-2xl font-semibold">Meus pedidos</h2>

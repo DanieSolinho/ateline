@@ -3,10 +3,19 @@ import type { DadosCheckout } from "@/lib/checkout";
 import type { ItemCarrinho } from "@/types/carrinho";
 import type { Pedido, StatusDoPedido } from "@/types/pedido";
 
-export type PedidoParaEnviar = Omit<Pedido, "numero" | "criadoEm" | "status" | "guardadoAte">;
+export type PedidoParaEnviar = Omit<Pedido, "numero" | "criadoEm" | "status" | "guardadoAte" | "creditoUsado"> & {
+  usarCredito?: boolean; // só vale para quem está logada e tem saldo
+};
 
 export type ResultadoDoPedido =
-  | { ok: true; numero: string; guardadoAte: string | null }
+  | {
+      ok: true;
+      numero: string;
+      guardadoAte: string | null;
+      status: StatusDoPedido;
+      pagoAgora: number; // o que falta pagar de sinal, já descontado o crédito
+      creditoUsado: number;
+    }
   | { ok: false; mensagem: string };
 
 // Transforma o erro do banco numa frase que a cliente entende
@@ -50,8 +59,21 @@ export async function enviarPedido(pedido: PedidoParaEnviar): Promise<ResultadoD
     console.warn("Pedido recusado:", error.message);
     return { ok: false, mensagem: mensagemDeErroDoPedido(error.message, pedido.itens) };
   }
-  const resposta = data as { numero: string; guardadoAte: string | null };
-  return { ok: true, numero: resposta.numero, guardadoAte: resposta.guardadoAte };
+  const resposta = data as {
+    numero: string;
+    guardadoAte: string | null;
+    status?: StatusDoPedido;
+    pagoAgora?: number | string;
+    creditoUsado?: number | string;
+  };
+  return {
+    ok: true,
+    numero: resposta.numero,
+    guardadoAte: resposta.guardadoAte,
+    status: resposta.status ?? "aguardando_pagamento",
+    pagoAgora: resposta.pagoAgora === undefined ? pedido.pagoAgora : Number(resposta.pagoAgora),
+    creditoUsado: Number(resposta.creditoUsado ?? 0),
+  };
 }
 
 // Uma linha da tabela "pedidos" do Supabase
@@ -65,6 +87,7 @@ export type LinhaDePedido = {
   pago_agora: number;
   na_retirada: number;
   restante_compra: number;
+  credito_usado?: number;
 };
 
 export function pedidoDaLinha(linha: LinhaDePedido): Pedido {
@@ -78,6 +101,7 @@ export function pedidoDaLinha(linha: LinhaDePedido): Pedido {
     pagoAgora: Number(linha.pago_agora),
     naRetirada: Number(linha.na_retirada),
     restanteCompra: Number(linha.restante_compra),
+    creditoUsado: Number(linha.credito_usado ?? 0),
   };
 }
 
@@ -85,7 +109,7 @@ export function pedidoDaLinha(linha: LinhaDePedido): Pedido {
 export async function buscarMeusPedidos(): Promise<Pedido[] | null> {
   const { data, error } = await supabase
     .from("pedidos")
-    .select("numero, status, criado_em, guardado_ate, cliente, itens, pago_agora, na_retirada, restante_compra")
+    .select("numero, status, criado_em, guardado_ate, cliente, itens, pago_agora, na_retirada, restante_compra, credito_usado")
     .order("criado_em");
   if (error) {
     console.warn("Não deu para buscar os pedidos:", error.message);

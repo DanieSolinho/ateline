@@ -26,6 +26,7 @@ Hoje o atendimento da Ateline é todo pelo WhatsApp: a cliente pergunta se o bol
 - **Encomenda:** formulário de orçamento para um bolo novo e a opção de **refazer** um bolo que saiu do acervo, com cupom de desconto e antecedência mínima de 20 dias.
 - **Carrinho e checkout** com aluguel e compra no mesmo pedido, validação de CPF e telefone, aceite do contrato e chave Pix para devolver a taxa de segurança. O banco confere a agenda e os preços e reserva as peças por 2 horas, até o sinal ser pago.
 - **Login sem senha** (link mágico por e-mail) e **Minha conta:** próxima retirada, histórico de pedidos com a situação de cada um e dados pessoais salvos na conta.
+- **Adiar ou cancelar pela conta:** com o sinal pago e até 15 dias antes da festa, a cliente escolhe a nova data num calendário que só mostra os dias livres, e o banco move a reserva na hora. Se cancelar, o sinal vira **crédito em loja** por 3 meses, que pode pagar o sinal de um próximo pedido no checkout (se cobrir o sinal inteiro, o pedido já sai confirmado).
 - **Painel da loja:** agenda do dia (o que sai, o que volta, o que está atrasado), confirmação de pagamento com um clique, checklist de devolução e a conta da taxa de segurança (multa por atraso, vela não devolvida, avaria).
 - **Venda tira o bolo do acervo:** uma peça vendida some do aluguel e da venda sozinha.
 - **Catálogo vindo de uma planilha:** a dona da loja cadastra os bolos no Excel, e um script valida e gera o JSON que o site usa.
@@ -60,7 +61,7 @@ flowchart LR
 - **Site estático + Supabase, sem servidor próprio.** As páginas são geradas na hora de publicar (`output: "export"`, uma por bolo com `generateStaticParams`) e já saem com a agenda daquele momento. No navegador, a agenda é buscada de novo no Supabase, então uma reserva feita no painel aparece na hora.
 - **O banco é quem decide.** A trava contra reserva dupla é uma *exclusion constraint* do Postgres (mesma peça + períodos que se cruzam), e o pedido é criado por uma função (`criar_pedido`) que confere a agenda, recalcula os valores com os preços do banco e reserva as peças numa só transação. Reservas sem sinal se soltam sozinhas depois de 2 horas.
 - **Segurança por pessoa com RLS.** Visitante só lê a agenda pública; cada cliente só vê os próprios dados e pedidos; o painel e as ações da loja só funcionam para quem está na tabela da equipe. A chave secreta do Supabase fica só nos *secrets* do GitHub.
-- **Regras de negócio em funções puras e testadas.** Datas, disponibilidade, valores, cupom, conta da taxa de segurança e validações ficam em `lib/`, separados das telas, com 112 testes. As regras de datas do banco foram comparadas com as do site para todos os dias de um ano.
+- **Regras de negócio em funções puras e testadas.** Datas, disponibilidade, valores, cupom, conta da taxa de segurança e validações ficam em `lib/`, separados das telas, com 132 testes. As regras de datas do banco foram comparadas com as do site para todos os dias de um ano.
 - **Testes de ponta a ponta a cada push.** O Playwright abre o site publicado num navegador (computador e celular), aluga um bolo do catálogo até a confirmação e confere os avisos de data ocupada e bolo vendido, com o Supabase simulado. Se algum falhar, o site não é publicado.
 - **Carrinho no navegador.** Fica no `localStorage`, lido com `useSyncExternalStore`, e as abas abertas ficam sincronizadas.
 - **Planilha como fonte dos dados.** `npm run importar` lê `dados-fonte/catalogo.xlsx`, aponta erros (código repetido, preço faltando, topo inexistente) e só grava `data/catalogo.json` se estiver tudo certo. A cada push, o GitHub copia os preços para o banco.
@@ -116,7 +117,7 @@ dados-fonte/  planilha preenchida pela loja
 
 - Pagamento do sinal pelo Mercado Pago (Pix e cartão), com confirmação automática no painel
 - E-mail próprio e domínio `ateline.com.br`
-- Contrato em PDF, crédito em loja e adiamento pelo site
+- Contrato em PDF
 - Rascunhos de posts para o Instagram a partir da agenda ("livres neste fim de semana")
 - Fotos dos bolos e kits "pegue e monte"
 

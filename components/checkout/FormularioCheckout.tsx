@@ -7,6 +7,8 @@ import { useCarrinho } from "@/hooks/useCarrinho";
 import { salvarPedido, usePedidos } from "@/hooks/usePedidos";
 import { usePerfil } from "@/hooks/usePerfil";
 import { useSessao } from "@/hooks/useSessao";
+import { useMeuCredito } from "@/hooks/useMeuCredito";
+import { creditoNoPedido } from "@/lib/credito";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { alugueisDo, chaveDoItem, comprasDo, resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { buscarCep, cepValido, formatarCep } from "@/lib/cep";
@@ -65,6 +67,8 @@ export function FormularioCheckout() {
   const pedidosAnteriores = usePedidos();
   const sessao = useSessao();
   const { perfil, carregando: carregandoPerfil } = usePerfil(sessao?.user.id ?? null);
+  const credito = useMeuCredito(sessao?.user.id ?? null);
+  const [usarCredito, setUsarCredito] = useState(true);
 
   // Roda quando a cliente envia o formulário
   async function finalizar(_anterior: Estado, formData: FormData): Promise<Estado> {
@@ -90,9 +94,10 @@ export function FormularioCheckout() {
       naRetirada: resumo.temAluguel ? resumo.naRetirada : 0,
       restanteCompra: resumo.restanteCompras,
     };
+    const comCredito = usarCredito && (credito?.saldo ?? 0) > 0;
 
     // O banco confere a agenda e reserva as peças. Se alguém reservou antes, ele recusa.
-    const resposta = await enviarPedido(pedido);
+    const resposta = await enviarPedido({ ...pedido, usarCredito: comCredito });
     if (!resposta.ok) return { erros: {}, valores, erroDoPedido: resposta.mensagem };
 
     // Guarda também no navegador, para a confirmação e para quem não tem login
@@ -100,8 +105,10 @@ export function FormularioCheckout() {
       ...pedido,
       numero: resposta.numero,
       criadoEm: new Date().toISOString(),
-      status: "aguardando_pagamento",
+      status: resposta.status,
       guardadoAte: resposta.guardadoAte,
+      pagoAgora: resposta.pagoAgora, // já sem a parte paga com crédito
+      creditoUsado: resposta.creditoUsado,
     });
 
     // Logada: guarda os dados na conta para os próximos pedidos (sem fazer a cliente esperar)
@@ -143,6 +150,8 @@ export function FormularioCheckout() {
 
   const resumo = resumoDoCarrinho(itens);
   const alugueis = alugueisDo(itens);
+  const saldo = credito?.saldo ?? 0;
+  const descontoDoCredito = usarCredito ? creditoNoPedido(resumo.pagarAgora, saldo) : 0;
   const compras = comprasDo(itens);
 
   return (
@@ -390,9 +399,15 @@ export function FormularioCheckout() {
             <span>{formatarPreco(resumo.sinalCompras)}</span>
           </p>
         )}
+        {descontoDoCredito > 0 && (
+          <p className="flex justify-between text-sm">
+            <span>Crédito em loja</span>
+            <span>− {formatarPreco(descontoDoCredito)}</span>
+          </p>
+        )}
         <p className="flex items-baseline justify-between">
           <strong>Pagar agora</strong>
-          <strong className="font-display text-2xl">{formatarPreco(resumo.pagarAgora)}</strong>
+          <strong className="font-display text-2xl">{formatarPreco(resumo.pagarAgora - descontoDoCredito)}</strong>
         </p>
         {resumo.temAluguel && (
           <p className="flex justify-between text-sm text-ameixa-suave">
@@ -406,13 +421,25 @@ export function FormularioCheckout() {
             <span>{formatarPreco(resumo.restanteCompras)}</span>
           </p>
         )}
+        {saldo > 0 && (
+          <label className="flex cursor-pointer items-start gap-3 rounded-xl bg-white p-3 text-sm font-semibold">
+            <input
+              type="checkbox"
+              checked={usarCredito}
+              onChange={(evento) => setUsarCredito(evento.target.checked)}
+              className="mt-0.5 size-5 accent-framboesa"
+            />
+            Usar meu crédito em loja ({formatarPreco(saldo)} disponível)
+          </label>
+        )}
         <button type="submit" disabled={enviando}
           className="mt-2 h-14 rounded-xl bg-framboesa text-lg font-bold text-white hover:bg-framboesa-escura disabled:opacity-60">
           {enviando ? "Reservando…" : "Finalizar pedido"}
         </button>
         <p className="text-xs text-ameixa-suave">
-          As peças ficam guardadas por 2 horas enquanto você paga o sinal pelo WhatsApp. Em breve, o pagamento será
-          direto pelo Mercado Pago.
+          {descontoDoCredito > 0 && descontoDoCredito >= resumo.pagarAgora
+            ? "O crédito cobre o sinal inteiro: o pedido já sai confirmado."
+            : "As peças ficam guardadas por 2 horas enquanto você paga o sinal pelo WhatsApp. Em breve, o pagamento será direto pelo Mercado Pago."}
         </p>
       </aside>
     </form>

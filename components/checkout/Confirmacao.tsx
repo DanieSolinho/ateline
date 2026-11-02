@@ -52,6 +52,13 @@ export function Confirmacao() {
         </p>
       </div>
 
+      {(pedido.creditoUsado ?? 0) > 0 && (
+        <p className="rounded-2xl bg-[#e6f2ea] p-4 font-semibold text-folha">
+          Usamos {formatarPreco(pedido.creditoUsado ?? 0)} do seu crédito em loja
+          {aguardandoSinal ? " para pagar parte do sinal." : " e ele pagou o sinal inteiro. Sua reserva está garantida."}
+        </p>
+      )}
+
       {linkSinal && (
         <section className="flex flex-col items-start gap-3 rounded-2xl border-2 border-framboesa p-5">
           <h2 className="font-display text-xl font-semibold">Agora, pague o sinal de {formatarPreco(pedido.pagoAgora)}</h2>

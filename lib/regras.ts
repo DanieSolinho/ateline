@@ -5,3 +5,5 @@ export const MULTA_POR_DIA = 0.3; // atraso: 30% do valor da locação por dia, 
 export const DESCONTO_VELA = 10; // vela acoplada que não volta
 export const ANTECEDENCIA_REFAZER_DIAS = 20; // bolo igual a um do acervo
 export const ANTECEDENCIA_BOLO_NOVO_DIAS = 20; // bolo novo, do jeito da cliente
+export const ANTECEDENCIA_ADIAMENTO_DIAS = 15; // adiar o aluguel: até 15 dias antes da festa
+export const VALIDADE_CREDITO_MESES = 3; // cancelamento com sinal pago: o sinal vira crédito por 3 meses
