@@ -13,7 +13,7 @@ export default function ContratoPage() {
   return (
     <PaginaDeTexto
       titulo="Contrato de locação"
-      resumo="Os principais pontos do contrato que você aceita ao reservar. A versão completa, com seus dados e datas, chega por e-mail depois da reserva."
+      resumo="Os principais pontos do contrato que você aceita ao reservar. A versão completa, com seus dados e datas, pode ser baixada em PDF logo depois da reserva e em Minha conta."
     >
       <section>
         <h2>Retirada e devolução</h2>

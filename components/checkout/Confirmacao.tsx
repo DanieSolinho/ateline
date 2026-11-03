@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CircleCheck, MessageCircle } from "lucide-react";
+import { BotaoContrato } from "@/components/conta/BotaoContrato";
 import { useUltimoPedido } from "@/hooks/usePedidos";
 import { diaEHora, diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { chaveDoItem } from "@/lib/carrinho";
@@ -151,6 +152,7 @@ export function Confirmacao() {
         )}
       </dl>
 
+      {temAluguel && <BotaoContrato pedido={pedido} destaque />}
 
       <div className="flex flex-wrap gap-x-6 gap-y-2">
         <Link href="/conta" className="font-bold text-framboesa hover:underline">

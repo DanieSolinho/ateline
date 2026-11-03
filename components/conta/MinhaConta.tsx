@@ -6,6 +6,7 @@ import { CalendarClock, MapPin, MessageCircle } from "lucide-react";
 import { CartaoDaConta } from "@/components/conta/CartaoDaConta";
 import { MeusDados } from "@/components/conta/MeusDados";
 import { MinhasReservas } from "@/components/conta/MinhasReservas";
+import { BotaoContrato } from "@/components/conta/BotaoContrato";
 import { apagarPedidos, usePedidos } from "@/hooks/usePedidos";
 import { useMeusPedidos } from "@/hooks/useMeusPedidos";
 import { useMeuCredito } from "@/hooks/useMeuCredito";
@@ -112,7 +113,11 @@ export function MinhaConta() {
   const proxima = proximaRetirada(pedidos, hoje, agora);
   const linhas = historico(pedidos, hoje, agora);
   const proximaAguardando = proxima && situacaoDoPedido(proxima.pedido, agora) === "aguardando";
-  const pedidosComAluguel = pedidos.filter((pedido) => pedido.itens.some((item) => item.tipo === "aluguel"));
+  // Contratos: dos pedidos com aluguel que ainda valem (sem os cancelados e os que venceram sem sinal)
+  const pedidosComAluguel = pedidos.filter((pedido) => {
+    const situacao = situacaoDoPedido(pedido, agora);
+    return situacao !== "cancelado" && situacao !== "vencido" && pedido.itens.some((item) => item.tipo === "aluguel");
+  });
 
   return (
     <div className="flex flex-wrap items-start gap-10">
@@ -312,7 +317,7 @@ export function MinhaConta() {
                   <span>
                     <strong>{pedido.numero}</strong> · aceito em {data(pedido.criadoEm.slice(0, 10))}
                   </span>
-                  <span className="text-sm text-ameixa-suave">PDF em breve</span>
+                  <BotaoContrato pedido={pedido} />
                 </li>
               ))}
             </ul>
