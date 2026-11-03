@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#b8294f">
+  <title>Sem internet · Painel Ateline</title>
+  <style>
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #fbefef; color: #2b1a22;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 24px; box-sizing: border-box; text-align: center; }
+    main { max-width: 360px; display: flex; flex-direction: column; gap: 16px; align-items: center; }
+    h1 { margin: 0; font-size: 1.6rem; }
+    p { margin: 0; color: #5e4a53; line-height: 1.5; }
+    button { min-height: 48px; padding: 0 24px; border: 0; border-radius: 12px; background: #b8294f; color: #fff;
+      font: inherit; font-weight: 700; cursor: pointer; }
+    button:focus-visible { outline: 3px solid #2b1a22; outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sem internet</h1>
+    <p>O painel precisa de internet para mostrar a agenda e os pedidos atualizados. Confira o Wi-Fi ou os dados móveis e tente de novo.</p>
+    <button type="button" onclick="location.reload()">Tentar de novo</button>
+  </main>
+</body>
+</html>

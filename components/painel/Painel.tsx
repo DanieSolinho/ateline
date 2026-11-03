@@ -11,6 +11,7 @@ import { CartaoSaida } from "@/components/painel/CartaoSaida";
 import { ListaAguardando } from "@/components/painel/ListaAguardando";
 import { useEquipe } from "@/hooks/useEquipe";
 import { useHoje } from "@/hooks/useHoje";
+import { InstalarPainel } from "@/components/painel/InstalarPainel";
 import { useSessao } from "@/hooks/useSessao";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
 import { somarDias } from "@/lib/encomenda";
@@ -81,6 +82,7 @@ function PainelComAbas({ hoje }: { hoje: string }) {
   return (
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-3xl font-bold">Painel da loja</h1>
+      <InstalarPainel />
       <div
         role="tablist"
         aria-label="Painel da loja"
