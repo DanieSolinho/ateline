@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Download, Share, X } from "lucide-react";
+import { Download, Share, SquarePlus, X } from "lucide-react";
 import { abertoComoApp, eIosOuIpad } from "@/lib/instalar";
 
 // O evento que o Chrome (Android e computador) dispara quando o site pode ser instalado
@@ -74,17 +74,35 @@ export function InstalarPainel() {
   return (
     <aside
       aria-label="Instalar o painel no celular"
-      className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border-2 border-framboesa/40 bg-white p-4"
+      className={`flex flex-wrap justify-between gap-3 rounded-2xl border-2 border-framboesa/40 bg-white p-4 ${modo === "ios" ? "items-start" : "items-center"}`}
     >
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <strong>Use o painel como app</strong>
         {modo === "botao" ? (
           <p className="text-sm text-ameixa-suave">Fica um ícone na tela inicial e o painel abre em tela cheia.</p>
         ) : (
-          <p className="text-sm text-ameixa-suave">
-            No Safari, toque em <Share size={14} aria-label="Compartilhar" className="inline align-[-2px]" /> e depois em{" "}
-            <strong>Adicionar à Tela de Início</strong>.
-          </p>
+          <>
+            <p className="text-sm text-ameixa-suave">
+              No iPhone, isso é feito no menu do Safari (o site não consegue instalar sozinho):
+            </p>
+            <ol className="mt-1 flex list-decimal flex-col gap-1.5 pl-5 text-sm">
+              <li>
+                Toque no botão <strong>Compartilhar</strong>{" "}
+                <Share size={16} aria-hidden className="inline align-[-3px] text-[#0a6cff]" /> do Safari. No iPhone ele
+                fica na barra de baixo (se ela sumiu, role a página um pouco para cima); no iPad, em cima.
+              </li>
+              <li>
+                Role a lista que abrir e toque em <strong>Adicionar à Tela de Início</strong>{" "}
+                <SquarePlus size={16} aria-hidden className="inline align-[-3px]" />.
+              </li>
+              <li>
+                Toque em <strong>Adicionar</strong>, no canto de cima.
+              </li>
+            </ol>
+            <p className="mt-1 text-sm text-ameixa-suave">
+              Se você abriu o painel por outro app (WhatsApp, Instagram, Gmail), abra primeiro no Safari.
+            </p>
+          </>
         )}
       </div>
       <div className="flex items-center gap-1">
