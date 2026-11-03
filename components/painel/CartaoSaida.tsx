@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { Check, MessageCircle } from "lucide-react";
+import { FotosDaPeca } from "@/components/painel/FotosDaPeca";
 import { formatarPreco } from "@/lib/formatar";
+import { pastaDoGrupo } from "@/lib/fotos";
 import { receberNaRetirada, registrarRetirada, type GrupoDaAgenda } from "@/lib/painel";
 import { TAXA_SEGURANCA } from "@/lib/regras";
 
@@ -55,6 +57,7 @@ export function CartaoSaida({ grupo, aoMudar }: { grupo: GrupoDaAgenda; aoMudar:
           <MessageCircle size={16} aria-hidden /> Falar com a cliente
         </a>
       )}
+      <FotosDaPeca pasta={pastaDoGrupo(grupo)} momento="retirada" />
       {erro && (
         <p role="alert" className="text-sm font-semibold text-alerta">
           {erro}

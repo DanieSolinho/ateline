@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import { linkDoWhatsAppDaCliente, tituloDoGrupo } from "@/components/painel/CartaoSaida";
+import { FotosDaPeca } from "@/components/painel/FotosDaPeca";
 import { totalDoItem } from "@/lib/carrinho";
+import { pastaDoGrupo } from "@/lib/fotos";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularDevolucao, diasDeAtraso, registrarDevolucao, type GrupoDaAgenda } from "@/lib/painel";
 import { DESCONTO_VELA, MULTA_POR_DIA, TAXA_SEGURANCA } from "@/lib/regras";
@@ -67,6 +69,10 @@ export function CartaoDevolucao({ grupo, hoje, aoMudar }: { grupo: GrupoDaAgenda
         {grupo.pedido ? `${grupo.pedido.nome} · ${grupo.pedido.numero}` : "Reserva feita pelo WhatsApp"}
         {grupo.codigos.length > 1 && ` · peças: ${grupo.codigos.join(", ")}`}
       </p>
+
+      {/* As fotos da saída ficam à mão para comparar com a peça que voltou */}
+      <FotosDaPeca pasta={pastaDoGrupo(grupo)} momento="retirada" podeEnviar={false} />
+      <FotosDaPeca pasta={pastaDoGrupo(grupo)} momento="devolucao" />
 
       {grupo.devolvido ? (
         <p className="flex items-center gap-1.5 font-bold text-folha">
