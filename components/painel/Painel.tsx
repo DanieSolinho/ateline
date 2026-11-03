@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { AbaLembretes } from "@/components/painel/AbaLembretes";
 import { AbaListaDeEspera } from "@/components/painel/AbaListaDeEspera";
@@ -12,6 +11,8 @@ import { ListaAguardando } from "@/components/painel/ListaAguardando";
 import { useEquipe } from "@/hooks/useEquipe";
 import { useHoje } from "@/hooks/useHoje";
 import { InstalarPainel } from "@/components/painel/InstalarPainel";
+import { EntrarComSenha } from "@/components/painel/EntrarComSenha";
+import { SenhaDoApp } from "@/components/painel/SenhaDoApp";
 import { useSessao } from "@/hooks/useSessao";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
 import { somarDias } from "@/lib/encomenda";
@@ -35,16 +36,7 @@ export function Painel() {
     return <p className="text-ameixa-suave">Carregando…</p>;
   }
 
-  if (!sessao) {
-    return (
-      <Aviso titulo="Painel da loja">
-        Entre com o e-mail da equipe da Ateline para abrir o painel.{" "}
-        <Link href="/entrar" className="font-bold text-framboesa underline">
-          Entrar
-        </Link>
-      </Aviso>
-    );
-  }
+  if (!sessao) return <EntrarComSenha />;
 
   if (!equipe) {
     return (
@@ -54,7 +46,7 @@ export function Painel() {
     );
   }
 
-  return <PainelComAbas hoje={hoje} />;
+  return <PainelComAbas hoje={hoje} email={sessao.user.email ?? ""} />;
 }
 
 const ABAS = [
@@ -65,7 +57,7 @@ const ABAS = [
 ] as const;
 type Aba = (typeof ABAS)[number]["id"];
 
-function PainelComAbas({ hoje }: { hoje: string }) {
+function PainelComAbas({ hoje, email }: { hoje: string; email: string }) {
   const [aba, setAba] = useState<Aba>("agenda");
 
   // Setas do teclado trocam de aba, como em qualquer sistema de abas
@@ -83,6 +75,7 @@ function PainelComAbas({ hoje }: { hoje: string }) {
     <div className="flex flex-col gap-6">
       <h1 className="font-display text-3xl font-bold">Painel da loja</h1>
       <InstalarPainel />
+      <SenhaDoApp email={email} />
       <div
         role="tablist"
         aria-label="Painel da loja"
