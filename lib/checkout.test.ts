@@ -12,8 +12,6 @@ const dadosPessoais = {
   pagamento: "pix",
 };
 
-const valido = { ...dadosPessoais, chavePix: "maria@exemplo.com", entrega: "retirada", aceite: "sim" };
-
 const endereco = {
   cep: "21321-000",
   rua: "Rua Cândido Benício",
@@ -22,6 +20,8 @@ const endereco = {
   cidade: "Rio de Janeiro",
   uf: "rj",
 };
+
+const valido = { ...dadosPessoais, ...endereco, chavePix: "maria@exemplo.com", entrega: "retirada", aceite: "sim" };
 
 // Os campos com erro, na ordem
 function camposComErro(resultado: { success: boolean; error?: { issues: { path: PropertyKey[] }[] } }) {
@@ -43,15 +43,20 @@ describe("checkout de aluguel", () => {
     expect(camposComErro(aluguel.safeParse({ ...valido, chavePix: "" }))).toEqual(["chavePix"]);
   });
 
-  it("exige endereço só quando é entrega", () => {
-    expect(aluguel.safeParse({ ...valido, entrega: "entrega" }).success).toBe(false);
-    expect(aluguel.safeParse({ ...valido, entrega: "entrega", endereco: "Rua X, 10, Benfica, 20911-000" }).success).toBe(true);
+  it("exige o endereço sempre, mesmo com retirada na loja (ele vai no contrato)", () => {
+    const semEndereco = { ...dadosPessoais, chavePix: "maria@exemplo.com", entrega: "retirada", aceite: "sim" };
+    expect(camposComErro(aluguel.safeParse(semEndereco))).toEqual(["cep", "rua", "numero", "bairro", "cidade", "uf"]);
+    expect(aluguel.safeParse({ ...valido, complemento: "" }).success).toBe(true);
   });
 });
 
 describe("checkout de compra", () => {
   it("não pede contrato nem chave Pix", () => {
     expect(compra.safeParse({ ...dadosPessoais, recebimento: "retirada" }).success).toBe(true);
+  });
+
+  it("com retirada na loja, não pede endereço", () => {
+    expect(camposComErro(compra.safeParse({ ...dadosPessoais, recebimento: "retirada" }))).toEqual([]);
   });
 
   it("no envio, exige o endereço completo", () => {

@@ -80,11 +80,11 @@ describe("montarContrato", () => {
 });
 
 describe("enderecoDaCliente", () => {
-  it("usa o endereço de entrega, depois o de envio", () => {
-    expect(enderecoDaCliente({ ...pedido.cliente, endereco: "Rua A, 10, Tijuca" })).toBe("Rua A, 10, Tijuca");
+  it("usa o endereço do pedido; nos pedidos antigos, o endereço da entrega", () => {
     expect(
-      enderecoDaCliente({ ...pedido.cliente, rua: "Rua B", numero: "5", bairro: "Centro", cidade: "Rio", uf: "rj", cep: "20000-000" }),
+      enderecoDaCliente({ ...pedido.cliente, rua: "Rua B", numero: "5", bairro: "Centro", cidade: "Rio", uf: "rj", cep: "20000000" }),
     ).toBe("Rua B, 5, Centro, Rio/RJ, CEP 20000-000");
+    expect(enderecoDaCliente({ ...pedido.cliente, endereco: "Rua A, 10, Tijuca" })).toBe("Rua A, 10, Tijuca");
     expect(enderecoDaCliente(pedido.cliente)).toBe("não informado no pedido");
   });
 });

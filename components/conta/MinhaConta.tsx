@@ -24,6 +24,7 @@ import {
 } from "@/lib/conta";
 import { mensagemDoSinal } from "@/lib/pedidos";
 import { linkWhatsApp } from "@/lib/contato";
+import { enderecoEmTexto } from "@/lib/endereco";
 import { formatarPreco } from "@/lib/formatar";
 import { ANTECEDENCIA_ADIAMENTO_DIAS, PERCENTUAL_SINAL, TAXA_SEGURANCA, VALIDADE_CREDITO_MESES } from "@/lib/regras";
 
@@ -342,6 +343,7 @@ export function MinhaConta() {
                 <Dado rotulo="WhatsApp" valor={formatarTelefone(cliente.whatsapp)} />
                 <Dado rotulo="CPF" valor={mascararCpf(cliente.cpf)} />
                 {cliente.chavePix && <Dado rotulo="Chave Pix (devolução da taxa)" valor={cliente.chavePix} />}
+                {enderecoEmTexto(cliente) && <Dado rotulo="Endereço" valor={enderecoEmTexto(cliente)!} />}
               </dl>
               <p className="text-sm text-ameixa-suave">
                 Esses dados ficam só neste navegador e preenchem o seu próximo pedido. Entre na sua conta para

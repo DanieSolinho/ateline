@@ -1,5 +1,6 @@
 import { totalDoItem } from "@/lib/carrinho";
 import { diaPorExtenso, horarioDaLoja } from "@/lib/calendario";
+import { enderecoEmTexto } from "@/lib/endereco";
 import { formatarPreco, formatarTelefone } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
 import { DESCONTO_VELA, MULTA_POR_DIA, PERCENTUAL_SINAL, TAXA_SEGURANCA, VALIDADE_CREDITO_MESES } from "@/lib/regras";
@@ -40,20 +41,9 @@ export function dataEHoraNoRio(isoComHora: string): { data: string; hora: string
   return { data, hora };
 }
 
-// O endereço que a cliente informou no pedido (entrega do aluguel ou envio da compra)
+// O endereço que a cliente informou no pedido (pedidos antigos têm o endereço da entrega num campo só)
 export function enderecoDaCliente(cliente: Pedido["cliente"]): string {
-  if (cliente.endereco) return cliente.endereco;
-  if (cliente.rua) {
-    const partes = [
-      `${cliente.rua}, ${cliente.numero ?? "s/n"}`,
-      cliente.complemento,
-      cliente.bairro,
-      cliente.cidade && cliente.uf ? `${cliente.cidade}/${cliente.uf.toUpperCase()}` : cliente.cidade,
-      cliente.cep ? `CEP ${cliente.cep}` : null,
-    ];
-    return partes.filter(Boolean).join(", ");
-  }
-  return "não informado no pedido";
+  return enderecoEmTexto(cliente) ?? cliente.endereco ?? "não informado no pedido";
 }
 
 // Descrição de uma peça alugada: "Safari · 3 andares, com topo Coroa dourada e base dourada (Nome: Alice)"

@@ -85,6 +85,15 @@ describe("dadosMaisRecentes", () => {
     });
     expect(dadosMaisRecentes([])).toBeNull();
   });
+
+  it("o endereço vem inteiro do último pedido com endereço", () => {
+    const antigo = { ...pedido("ATL-1", "", []), cliente: { nome: "Maria", email: "a@a.com", cep: "20000000", rua: "Rua A", numero: "1", complemento: "casa 2", bairro: "Tijuca", cidade: "Rio", uf: "RJ" } };
+    const novo = { ...pedido("ATL-2", "", []), cliente: { nome: "Maria", email: "a@a.com", cep: "21321000", rua: "Rua B", numero: "5", bairro: "Centro", cidade: "Rio", uf: "RJ" } };
+    const semEndereco = { ...pedido("ATL-3", "", []), cliente: { nome: "Maria", email: "a@a.com" } };
+    const dados = dadosMaisRecentes([antigo, novo, semEndereco] as Pedido[]);
+    expect(dados?.rua).toBe("Rua B");
+    expect(dados?.complemento).toBeUndefined(); // não herda o "casa 2" do endereço antigo
+  });
 });
 
 describe("situacaoDoPedido", () => {

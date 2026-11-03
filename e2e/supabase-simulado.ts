@@ -12,6 +12,9 @@ export type Simulacao = {
 export async function simularSupabase(page: Page, simulacao: Simulacao = {}) {
   const pedidosEnviados: unknown[] = [];
 
+  // ViaCEP fora do ar no teste: a cliente preenche o endereço à mão
+  await page.route(/viacep\.com\.br/, (rota) => rota.fulfill({ status: 503, body: "" }));
+
   await page.route(/supabase\.co\//, async (rota) => {
     const caminho = new URL(rota.request().url()).pathname;
 

@@ -3,6 +3,7 @@ import type { ItemAluguel, ItemCarrinho } from "@/types/carrinho";
 import type { Periodo } from "@/types/reserva";
 import type { DadosCheckout } from "@/lib/checkout";
 import type { Pedido } from "@/types/pedido";
+import { CAMPOS_DO_ENDERECO, type CampoDoEndereco } from "@/lib/endereco";
 
 export type Situacao =
   | "aguardando"
@@ -86,16 +87,21 @@ export function historico(pedidos: Pedido[], hoje: string, agora = `${hoje}T00:0
     .sort((a, b) => b.data.localeCompare(a.data));
 }
 
-// Os dados pessoais mais recentes. Um pedido só de compra não tem chave Pix,
+// Os dados pessoais mais recentes. Um pedido só de compra não tem chave Pix (nem endereço, se for retirada),
 // então cada campo vem do último pedido que tiver esse campo preenchido.
-export type DadosPessoais = Pick<DadosCheckout, "nome" | "cpf" | "whatsapp" | "email" | "chavePix">;
+const CAMPOS_PESSOAIS = ["nome", "cpf", "whatsapp", "email", "chavePix"] as const;
+export type DadosPessoais = Pick<DadosCheckout, (typeof CAMPOS_PESSOAIS)[number] | CampoDoEndereco>;
 
 export function dadosMaisRecentes(pedidos: Pedido[]): DadosPessoais | null {
   if (pedidos.length === 0) return null;
   const dados: Partial<DadosPessoais> = {};
   for (const { cliente } of pedidos) {
-    for (const campo of ["nome", "cpf", "whatsapp", "email", "chavePix"] as const) {
+    for (const campo of CAMPOS_PESSOAIS) {
       if (cliente[campo]) dados[campo] = cliente[campo];
+    }
+    // O endereço vem inteiro do último pedido que tiver endereço (sem misturar complemento de um com rua de outro)
+    if (cliente.rua) {
+      for (const campo of CAMPOS_DO_ENDERECO) dados[campo] = cliente[campo] || undefined;
     }
   }
   return dados as DadosPessoais;

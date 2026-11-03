@@ -23,6 +23,13 @@ async function preencherCheckout(page: Page) {
   await page.getByLabel("WhatsApp", { exact: true }).fill("(21) 98765-4321");
   await page.getByLabel("E-mail", { exact: true }).fill("maria@exemplo.com");
   await page.getByLabel("Chave Pix (para devolver a taxa de segurança)").fill("maria@exemplo.com");
+  // Endereço (vai no contrato). O CEP é preenchido à mão para o teste não depender do ViaCEP.
+  await page.getByLabel("CEP", { exact: true }).fill("21321-000");
+  await page.getByLabel("Rua", { exact: true }).fill("Rua Cândido Benício");
+  await page.getByLabel("Número", { exact: true }).fill("100");
+  await page.getByLabel("Bairro", { exact: true }).fill("Praça Seca");
+  await page.getByLabel("Cidade", { exact: true }).fill("Rio de Janeiro");
+  await page.getByLabel("Estado", { exact: true }).fill("RJ");
   await page.getByLabel("Li e aceito o contrato de locação.").check();
 }
 

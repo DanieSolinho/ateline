@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CamposDeEndereco } from "@/components/CamposDeEndereco";
 import { usePerfil } from "@/hooks/usePerfil";
 import { esquemaPerfil, type Perfil } from "@/lib/perfil";
 
@@ -55,6 +56,11 @@ export function MeusDados({ idDaCliente, email }: { idDaCliente: string; email: 
           <input id="chavePix" name="chavePix" defaultValue={perfil?.chavePix} className={estiloCampo} />
         </Campo>
       </div>
+      <fieldset className="flex flex-col gap-3">
+        <legend className="font-display text-lg font-semibold">Endereço</legend>
+        <p className="text-sm text-ameixa-suave">Vai no contrato de locação e preenche o checkout.</p>
+        <CamposDeEndereco inicial={perfil ?? undefined} erros={erros} />
+      </fieldset>
       <div className="flex flex-wrap items-center gap-4">
         <button
           type="submit"

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { cepValido } from "@/lib/cep";
+import { errosDoEndereco } from "@/lib/endereco";
 import { cpfValido, somenteDigitos, telefoneValido } from "@/lib/validacao";
 
 const texto = z.string().trim().optional();
@@ -20,7 +20,7 @@ export function criarEsquemaCheckout({ temAluguel, temCompra }: ConteudoDoPedido
       // Aluguel
       chavePix: texto, // para devolver a taxa de segurança
       entrega: z.enum(["retirada", "entrega"]).optional(),
-      endereco: texto,
+      endereco: texto, // pedidos antigos: endereço da entrega num campo só
       aceite: z.literal("sim").optional(),
 
       // Compra
@@ -40,22 +40,14 @@ export function criarEsquemaCheckout({ temAluguel, temCompra }: ConteudoDoPedido
       if (temAluguel) {
         if ((dados.chavePix ?? "").length < 5) erro("chavePix", "Coloque a chave Pix para a devolução da taxa de segurança.");
         if (!dados.entrega) erro("entrega", "Escolha como vai buscar o bolo alugado.");
-        if (dados.entrega === "entrega" && (dados.endereco ?? "").length < 10) {
-          erro("endereco", "Escreva o endereço completo para a entrega, com bairro e CEP.");
-        }
         if (dados.aceite !== "sim") erro("aceite", "Para reservar, aceite o contrato de locação.");
       }
 
-      if (temCompra) {
-        if (!dados.recebimento) erro("recebimento", "Escolha como quer receber a compra.");
-        if (dados.recebimento === "envio") {
-          if (!cepValido(dados.cep ?? "")) erro("cep", "CEP inválido. São 8 números.");
-          if (!dados.rua) erro("rua", "Escreva a rua.");
-          if (!dados.numero) erro("numero", "Escreva o número (ou S/N).");
-          if (!dados.bairro) erro("bairro", "Escreva o bairro.");
-          if (!dados.cidade) erro("cidade", "Escreva a cidade.");
-          if (!/^[A-Za-z]{2}$/.test(dados.uf ?? "")) erro("uf", "Estado com 2 letras, ex.: RJ.");
-        }
+      if (temCompra && !dados.recebimento) erro("recebimento", "Escolha como quer receber a compra.");
+
+      // Endereço: sempre no aluguel (vai no contrato) e no envio da compra
+      if (temAluguel || dados.recebimento === "envio") {
+        for (const [campo, mensagem] of Object.entries(errosDoEndereco(dados))) erro(campo, mensagem);
       }
     })
     .transform((dados) => ({

@@ -7,11 +7,11 @@ import { useCarrinho } from "@/hooks/useCarrinho";
 import { salvarPedido, usePedidos } from "@/hooks/usePedidos";
 import { usePerfil } from "@/hooks/usePerfil";
 import { useSessao } from "@/hooks/useSessao";
+import { CamposDeEndereco } from "@/components/CamposDeEndereco";
 import { useMeuCredito } from "@/hooks/useMeuCredito";
 import { creditoNoPedido } from "@/lib/credito";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { alugueisDo, chaveDoItem, comprasDo, resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
-import { buscarCep, cepValido, formatarCep } from "@/lib/cep";
 import { dadosMaisRecentes } from "@/lib/conta";
 import { enviarPedido } from "@/lib/pedidos";
 import { salvarPerfil } from "@/lib/perfil";
@@ -43,25 +43,6 @@ export function FormularioCheckout() {
   const router = useRouter();
   const [entrega, setEntrega] = useState<"retirada" | "entrega">("retirada");
   const [recebimento, setRecebimento] = useState<"retirada" | "envio">("retirada");
-
-  // Endereço do envio: o CEP preenche rua, bairro, cidade e estado
-  const [endereco, setEndereco] = useState({ cep: "", rua: "", bairro: "", cidade: "", uf: "" });
-  const [situacaoCep, setSituacaoCep] = useState<"" | "buscando" | "nao-encontrado">("");
-
-  async function aoDigitarCep(valor: string) {
-    const cep = formatarCep(valor);
-    setEndereco((atual) => ({ ...atual, cep }));
-    if (!cepValido(cep)) return setSituacaoCep("");
-
-    setSituacaoCep("buscando");
-    const achado = await buscarCep(cep);
-    if (achado) {
-      setEndereco((atual) => ({ ...atual, ...achado }));
-      setSituacaoCep("");
-    } else {
-      setSituacaoCep("nao-encontrado");
-    }
-  }
 
   // Logada: os dados da conta (Supabase) têm prioridade sobre os guardados no navegador
   const pedidosAnteriores = usePedidos();
@@ -113,8 +94,21 @@ export function FormularioCheckout() {
 
     // Logada: guarda os dados na conta para os próximos pedidos (sem fazer a cliente esperar)
     if (sessao) {
-      const { nome, cpf, whatsapp, chavePix } = resultado.data;
-      void salvarPerfil(sessao.user.id, { nome, cpf, whatsapp, chavePix: chavePix || perfil?.chavePix || "" });
+      const dados = resultado.data;
+      const enderecoNovo = Boolean(dados.rua); // o pedido tinha endereço (aluguel ou envio)
+      void salvarPerfil(sessao.user.id, {
+        nome: dados.nome,
+        cpf: dados.cpf,
+        whatsapp: dados.whatsapp,
+        chavePix: dados.chavePix || perfil?.chavePix || "",
+        cep: enderecoNovo ? (dados.cep ?? "") : (perfil?.cep ?? ""),
+        rua: enderecoNovo ? (dados.rua ?? "") : (perfil?.rua ?? ""),
+        numero: enderecoNovo ? (dados.numero ?? "") : (perfil?.numero ?? ""),
+        complemento: enderecoNovo ? (dados.complemento ?? "") : (perfil?.complemento ?? ""),
+        bairro: enderecoNovo ? (dados.bairro ?? "") : (perfil?.bairro ?? ""),
+        cidade: enderecoNovo ? (dados.cidade ?? "") : (perfil?.cidade ?? ""),
+        uf: enderecoNovo ? (dados.uf ?? "") : (perfil?.uf ?? ""),
+      });
     }
 
     esvaziar();
@@ -134,6 +128,7 @@ export function FormularioCheckout() {
   };
   const valores: Record<string, string | undefined> =
     Object.keys(estado.valores).length > 0 ? estado.valores : preenchimento;
+  const chaveDoPreenchimento = carregandoPerfil ? "carregando" : "pronto";
 
   if (itens === null) return <p className="mt-6 text-ameixa-suave">Carregando…</p>;
 
@@ -215,6 +210,16 @@ export function FormularioCheckout() {
         </fieldset>
 
         {resumo.temAluguel && (
+          <fieldset className="flex flex-col gap-4 rounded-2xl border border-linha p-5">
+            <legend className="px-2 font-display text-xl font-semibold">Seu endereço</legend>
+            <p className="text-sm text-ameixa-suave">
+              Ele vai no contrato de locação{sessao ? " e fica salvo na sua conta para os próximos pedidos" : ""}.
+            </p>
+            <CamposDeEndereco key={chaveDoPreenchimento} inicial={valores} erros={erros} />
+          </fieldset>
+        )}
+
+        {resumo.temAluguel && (
           <fieldset className="flex flex-col gap-3 rounded-2xl border border-linha p-5">
             <legend className="px-2 font-display text-xl font-semibold">Como você vai buscar o aluguel?</legend>
             <label className={estiloOpcao(entrega === "retirada")}>
@@ -230,15 +235,9 @@ export function FormularioCheckout() {
                 onChange={() => setEntrega("entrega")} className="mt-1 size-5 accent-framboesa" />
               <span>
                 <strong className="block">Entrega no endereço</strong>
-                <span className="text-sm text-ameixa-suave">Valor de acordo com o bairro, combinado pelo WhatsApp</span>
+                <span className="text-sm text-ameixa-suave">No endereço acima. Valor de acordo com o bairro, combinado pelo WhatsApp</span>
               </span>
             </label>
-            {entrega === "entrega" && (
-              <Campo nome="endereco" rotulo="Endereço completo, com bairro e CEP" erro={erros.endereco}>
-                <input id="endereco" name="endereco" autoComplete="street-address" defaultValue={valores.endereco}
-                  aria-invalid={!!erros.endereco} aria-describedby="endereco-erro" className={estiloCampo} />
-              </Campo>
-            )}
           </fieldset>
         )}
 
@@ -263,59 +262,13 @@ export function FormularioCheckout() {
             </label>
 
             {recebimento === "envio" && (
-              <div className="grid gap-4 sm:grid-cols-6">
-                <div className="sm:col-span-2">
-                  <Campo nome="cep" rotulo="CEP" erro={erros.cep}>
-                    <input id="cep" name="cep" inputMode="numeric" autoComplete="postal-code" placeholder="00000-000"
-                      value={endereco.cep} onChange={(evento) => aoDigitarCep(evento.target.value)}
-                      aria-invalid={!!erros.cep} aria-describedby="cep-erro cep-situacao" className={estiloCampo} />
-                    <p id="cep-situacao" aria-live="polite" className="text-sm text-ameixa-suave">
-                      {situacaoCep === "buscando" && "Buscando endereço…"}
-                      {situacaoCep === "nao-encontrado" && "Não achamos esse CEP. Preencha o endereço abaixo."}
-                    </p>
-                  </Campo>
-                </div>
-                <div className="sm:col-span-4">
-                  <Campo nome="rua" rotulo="Rua" erro={erros.rua}>
-                    <input id="rua" name="rua" autoComplete="address-line1" value={endereco.rua}
-                      onChange={(evento) => setEndereco({ ...endereco, rua: evento.target.value })}
-                      aria-invalid={!!erros.rua} aria-describedby="rua-erro" className={estiloCampo} />
-                  </Campo>
-                </div>
-                <div className="sm:col-span-2">
-                  <Campo nome="numero" rotulo="Número" erro={erros.numero}>
-                    <input id="numero" name="numero" defaultValue={valores.numero} aria-invalid={!!erros.numero}
-                      aria-describedby="numero-erro" className={estiloCampo} />
-                  </Campo>
-                </div>
-                <div className="sm:col-span-4">
-                  <Campo nome="complemento" rotulo="Complemento (opcional)">
-                    <input id="complemento" name="complemento" autoComplete="address-line2"
-                      defaultValue={valores.complemento} className={estiloCampo} />
-                  </Campo>
-                </div>
-                <div className="sm:col-span-2">
-                  <Campo nome="bairro" rotulo="Bairro" erro={erros.bairro}>
-                    <input id="bairro" name="bairro" value={endereco.bairro}
-                      onChange={(evento) => setEndereco({ ...endereco, bairro: evento.target.value })}
-                      aria-invalid={!!erros.bairro} aria-describedby="bairro-erro" className={estiloCampo} />
-                  </Campo>
-                </div>
-                <div className="sm:col-span-3">
-                  <Campo nome="cidade" rotulo="Cidade" erro={erros.cidade}>
-                    <input id="cidade" name="cidade" autoComplete="address-level2" value={endereco.cidade}
-                      onChange={(evento) => setEndereco({ ...endereco, cidade: evento.target.value })}
-                      aria-invalid={!!erros.cidade} aria-describedby="cidade-erro" className={estiloCampo} />
-                  </Campo>
-                </div>
-                <div>
-                  <Campo nome="uf" rotulo="Estado" erro={erros.uf}>
-                    <input id="uf" name="uf" autoComplete="address-level1" maxLength={2} value={endereco.uf}
-                      onChange={(evento) => setEndereco({ ...endereco, uf: evento.target.value.toUpperCase() })}
-                      aria-invalid={!!erros.uf} aria-describedby="uf-erro" className={`${estiloCampo} uppercase`} />
-                  </Campo>
-                </div>
-                <p className="rounded-xl bg-blush p-3 text-sm sm:col-span-6">
+              <div className="flex flex-col gap-4">
+                {resumo.temAluguel ? (
+                  <p className="text-sm">Enviamos para o endereço que você preencheu em &quot;Seu endereço&quot;.</p>
+                ) : (
+                  <CamposDeEndereco key={chaveDoPreenchimento} inicial={valores} erros={erros} />
+                )}
+                <p className="rounded-xl bg-blush p-3 text-sm">
                   Depois do pedido, você manda o endereço no WhatsApp com um toque e a Ateline orça o frete com a
                   transportadora. O restante da compra e o frete são pagos antes do envio.
                 </p>
