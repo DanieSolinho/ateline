@@ -19,5 +19,8 @@ describe("mensagemDeErroDaSenha", () => {
     expect(mensagemDeErroDaSenha("Password should be at least 6 characters.")).toContain("Senha fraca");
     expect(mensagemDeErroDaSenha("Request rate limit reached")).toContain("Espere");
     expect(mensagemDeErroDaSenha("Failed to fetch")).toContain("internet");
+    expect(mensagemDeErroDaSenha("User already registered")).toContain("já tem conta");
+    expect(mensagemDeErroDaSenha("Email not confirmed")).toContain("confirmar o e-mail");
+    expect(mensagemDeErroDaSenha("Signups not allowed for this instance")).toContain("link por e-mail");
   });
 });

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CalendarClock, MapPin, MessageCircle } from "lucide-react";
 import { CartaoDaConta } from "@/components/conta/CartaoDaConta";
 import { MeusDados } from "@/components/conta/MeusDados";
+import { MinhaSenha } from "@/components/conta/MinhaSenha";
 import { MinhasReservas } from "@/components/conta/MinhasReservas";
 import { BotaoContrato } from "@/components/conta/BotaoContrato";
 import { apagarPedidos, usePedidos } from "@/hooks/usePedidos";
@@ -49,6 +50,7 @@ const SECOES = [
   { id: "credito", nome: "Crédito em loja" },
   { id: "contratos", nome: "Contratos" },
   { id: "dados", nome: "Meus dados" },
+  { id: "senha", nome: "Senha", soLogada: true },
 ];
 
 function dia(iso: string) {
@@ -106,6 +108,7 @@ export function MinhaConta() {
             <MeusDados idDaCliente={sessao.user.id} email={sessao.user.email ?? ""} />
           </section>
         )}
+        {sessao && <MinhaSenha email={sessao.user.email ?? ""} />}
       </div>
     );
   }
@@ -386,6 +389,8 @@ export function MinhaConta() {
             </>
           )}
         </section>
+
+        {sessao && <MinhaSenha email={sessao.user.email ?? ""} />}
       </div>
     </div>
   );
