@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { UserRound } from "lucide-react";
 import { BotaoCarrinho } from "@/components/BotaoCarrinho";
+import { BotaoFavoritos } from "@/components/BotaoFavoritos";
 import { MenuCelular } from "@/components/MenuCelular";
 import { LINKS_DO_MENU } from "@/lib/navegacao";
 import logo from "@/public/logo-ateline.png";
@@ -38,6 +39,7 @@ export function Header() {
           >
             <UserRound size={22} strokeWidth={1.8} />
           </Link>
+          <BotaoFavoritos />
           <BotaoCarrinho />
         </div>
       </div>

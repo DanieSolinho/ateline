@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MontarReserva } from "@/components/bolo/MontarReserva";
+import { BotaoFavorito } from "@/components/BotaoFavorito";
+import { ContarVisualizacao } from "@/components/bolo/ContarVisualizacao";
 import { getBases, getBoloDaVitrine, getTopos, getVitrine } from "@/lib/catalogo";
 import { formatarPreco } from "@/lib/formatar";
 import { getReservas } from "@/lib/reservas";
@@ -60,6 +62,7 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8">
+      <ContarVisualizacao codigo={bolo.codigo} />
       <nav aria-label="Você está em" className="mb-6 text-sm text-ameixa-suave">
         <Link href="/" className="hover:text-framboesa">Início</Link> /{" "}
         <Link href="/alugar" className="hover:text-framboesa">Bolos para alugar</Link> / {bolo.nome}
@@ -76,6 +79,7 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
             <p className="text-ameixa-suave">
               Tema {bolo.tema} · de {bolo.andaresMin} a {bolo.andaresMax} andares · Ref. {bolo.codigo}
             </p>
+            <BotaoFavorito codigo={bolo.codigo} nome={bolo.nome} variante="botao" />
           </div>
 
           <MontarReserva bolo={bolo} topos={topos} bases={bases} reservas={reservas} outros={outros} vendidos={vendidos} />

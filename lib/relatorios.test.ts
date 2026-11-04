@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { faturamentoPorMes, festasPorDiaDaSemana, nomeDoMesCurto, rankingDeBolos } from "./relatorios";
+import {
+  bolosMaisVistos,
+  faturamentoPorMes,
+  festasPorDiaDaSemana,
+  nomeDoMesCurto,
+  rankingDeBolos,
+  resumoDeClientes,
+  variacao,
+  vistosSemAluguel,
+} from "./relatorios";
 import type { ItemAluguel, ItemCompra } from "@/types/carrinho";
 
 const aluguel = (festa: string, preco: number, topo = 0): ItemAluguel => ({
@@ -57,5 +66,41 @@ describe("rankingDeBolos e festasPorDiaDaSemana", () => {
     const dias = festasPorDiaDaSemana(reservas, acervo);
     expect(dias.find((d) => d.dia === "Sábado")?.festas).toBe(2);
     expect(dias.find((d) => d.dia === "Domingo")?.festas).toBe(1);
+  });
+});
+
+describe("clientes e visualizações", () => {
+  const clientes = [
+    { cliente: "a", primeiroPedido: "2026-11-02T10:00:00Z", pedidos: 1 },
+    { cliente: "b", primeiroPedido: "2026-11-01T10:00:00Z", pedidos: 2 },
+    { cliente: "c", primeiroPedido: "2026-10-15T10:00:00Z", pedidos: 3 },
+    { cliente: "d", primeiroPedido: "2026-03-01T10:00:00Z", pedidos: 1 },
+  ];
+
+  it("conta clientes, novas no mês, do mês passado e as que voltaram", () => {
+    const resumo = resumoDeClientes(clientes, "2026-11-04");
+    expect(resumo).toMatchObject({ total: 4, novosEsteMes: 2, novosMesPassado: 1, voltaram: 2 });
+    expect(resumo.novosPorMes.map((m) => m.mes)).toEqual(["2026-06", "2026-07", "2026-08", "2026-09", "2026-10", "2026-11"]);
+    expect(resumoDeClientes(clientes, "2026-01-10").novosPorMes[0].mes).toBe("2025-08");
+  });
+
+  it("mostra a variação em relação ao período anterior", () => {
+    expect(variacao(5, 4)).toBe("+25%");
+    expect(variacao(3, 4)).toBe("-25%");
+    expect(variacao(3, 0)).toBe("novo");
+    expect(variacao(0, 0)).toBe("igual");
+  });
+
+  it("ordena os mais vistos e aponta os vistos que nunca saíram", () => {
+    const vistos = bolosMaisVistos(
+      [
+        { codigo: "A_001", ultimos30: 12, anteriores30: 6 },
+        { codigo: "B_001", ultimos30: 40, anteriores30: null },
+        { codigo: "C_001", ultimos30: null, anteriores30: 9 },
+      ],
+      new Map([["B_001", 3]]),
+    );
+    expect(vistos.map((v) => v.codigo)).toEqual(["B_001", "A_001"]);
+    expect(vistosSemAluguel(vistos).map((v) => v.codigo)).toEqual(["A_001"]);
   });
 });

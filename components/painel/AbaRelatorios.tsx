@@ -5,6 +5,7 @@ import dados from "@/data/catalogo.json";
 import { nomeDaPeca } from "@/lib/catalogo";
 import { formatarPreco } from "@/lib/formatar";
 import { supabase } from "@/lib/supabase";
+import { RelatorioClientes } from "@/components/painel/RelatorioClientes";
 import {
   faturamentoPorMes,
   festasPorDiaDaSemana,
@@ -18,7 +19,7 @@ const BOLOS_DO_ACERVO = (dados as Catalogo).bolos
   .filter((bolo) => bolo.status !== "inativo")
   .map((bolo) => bolo.codigo);
 
-export function AbaRelatorios() {
+export function AbaRelatorios({ hoje }: { hoje: string }) {
   const [relatorio, setRelatorio] = useState<DadosDoRelatorio | null | undefined>(undefined);
 
   useEffect(() => {
@@ -50,8 +51,11 @@ export function AbaRelatorios() {
   const maiorDia = Math.max(1, ...dias.map((d) => d.festas));
   const nuncaSairam = ranking.filter((b) => b.alugueis === 0);
 
+  const alugueisPorBolo = new Map(ranking.map((b) => [b.codigo, b.alugueis]));
+
   return (
     <div className="flex flex-col gap-6">
+      <RelatorioClientes hoje={hoje} alugueisPorBolo={alugueisPorBolo} />
       <p className="text-sm text-ameixa-suave">
         Últimos 12 meses. Os valores são dos pedidos pagos pelo site; as reservas feitas pelo WhatsApp entram no ranking
         e nos dias da semana.

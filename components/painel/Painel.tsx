@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { AbaLembretes } from "@/components/painel/AbaLembretes";
 import { AbaListaDeEspera } from "@/components/painel/AbaListaDeEspera";
+import { AbaInstagram } from "@/components/painel/AbaInstagram";
 import { AbaRelatorios } from "@/components/painel/AbaRelatorios";
 import { CartaoDevolucao } from "@/components/painel/CartaoDevolucao";
 import { CartaoSaida } from "@/components/painel/CartaoSaida";
@@ -14,8 +15,10 @@ import { InstalarPainel } from "@/components/painel/InstalarPainel";
 import { EntrarComSenha } from "@/components/painel/EntrarComSenha";
 import { SenhaDoApp } from "@/components/painel/SenhaDoApp";
 import { useSessao } from "@/hooks/useSessao";
+import { usePostsNaHora } from "@/hooks/usePostsNaHora";
 import { diaPorExtenso, horarioDaLoja, primeiraMaiuscula } from "@/lib/calendario";
 import { somarDias } from "@/lib/encomenda";
+import { marcarNavegadorDaEquipe } from "@/lib/visualizacoes";
 import {
   agruparReservas,
   buscarAgenda,
@@ -54,11 +57,14 @@ const ABAS = [
   { id: "espera", nome: "Lista de espera" },
   { id: "lembretes", nome: "Lembretes" },
   { id: "relatorios", nome: "Relatórios" },
+  { id: "instagram", nome: "Instagram" },
 ] as const;
 type Aba = (typeof ABAS)[number]["id"];
 
 function PainelComAbas({ hoje, email }: { hoje: string; email: string }) {
   const [aba, setAba] = useState<Aba>("agenda");
+  useEffect(() => marcarNavegadorDaEquipe(), []); // as visitas da loja não entram em "mais vistos"
+  const [postsNaHora, atualizarPostsNaHora] = usePostsNaHora();
 
   // Setas do teclado trocam de aba, como em qualquer sistema de abas
   function aoTeclar(evento: React.KeyboardEvent<HTMLDivElement>) {
@@ -97,6 +103,12 @@ function PainelComAbas({ hoje, email }: { hoje: string; email: string }) {
             }`}
           >
             {item.nome}
+            {item.id === "instagram" && postsNaHora > 0 && (
+              <span className="ml-1.5 rounded-full bg-framboesa px-2 py-0.5 text-xs text-white">
+                {postsNaHora}
+                <span className="sr-only"> {postsNaHora === 1 ? "post na hora de postar" : "posts na hora de postar"}</span>
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -104,7 +116,8 @@ function PainelComAbas({ hoje, email }: { hoje: string; email: string }) {
         {aba === "agenda" && <PainelDaEquipe hoje={hoje} />}
         {aba === "espera" && <AbaListaDeEspera />}
         {aba === "lembretes" && <AbaLembretes hoje={hoje} />}
-        {aba === "relatorios" && <AbaRelatorios />}
+        {aba === "relatorios" && <AbaRelatorios hoje={hoje} />}
+        {aba === "instagram" && <AbaInstagram hoje={hoje} aoMudar={atualizarPostsNaHora} />}
       </div>
     </div>
   );

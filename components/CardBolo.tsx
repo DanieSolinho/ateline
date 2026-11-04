@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Check, CircleSlash } from "lucide-react";
+import { BotaoFavorito } from "@/components/BotaoFavorito";
 import { formatarPreco } from "@/lib/formatar";
 import type { BoloVitrine } from "@/types/catalogo";
 
@@ -33,6 +34,7 @@ export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloP
           <span className="grid h-full place-items-center text-sm text-ameixa-suave">Foto em breve</span>
         )}
         <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold">{bolo.tema}</span>
+        <BotaoFavorito codigo={bolo.codigo} nome={bolo.nome} />
       </div>
 
       <div className="flex flex-col gap-1">

@@ -59,3 +59,69 @@ export function festasPorDiaDaSemana(
   }
   return contagem;
 }
+
+// ---------------------------------------------------------------------
+// Clientes e visualizações (função dados_de_clientes_e_visualizacoes)
+// ---------------------------------------------------------------------
+export type DadosDeClientes = {
+  clientes: { cliente: string; primeiroPedido: string; pedidos: number }[];
+  visualizacoes: { codigo: string; ultimos30: number | null; anteriores30: number | null }[];
+};
+
+// "2026-11-04" → "2026-10" (o mês anterior)
+function mesAnterior(anoMes: string): string {
+  const [ano, mes] = anoMes.split("-").map(Number);
+  const data = new Date(Date.UTC(ano, mes - 2, 1));
+  return data.toISOString().slice(0, 7);
+}
+
+// Quantas clientes, quantas novas (primeiro pedido pago no mês) e quantas voltaram
+export function resumoDeClientes(clientes: DadosDeClientes["clientes"], hoje: string) {
+  const esteMes = hoje.slice(0, 7);
+  const passado = mesAnterior(esteMes);
+  const meses: string[] = [esteMes];
+  while (meses.length < 6) meses.unshift(mesAnterior(meses[0]));
+
+  const novosPorMes = meses.map((mes) => ({
+    mes,
+    novos: clientes.filter((c) => c.primeiroPedido.slice(0, 7) === mes).length,
+  }));
+  return {
+    total: clientes.length,
+    novosEsteMes: novosPorMes.at(-1)!.novos,
+    novosMesPassado: clientes.filter((c) => c.primeiroPedido.slice(0, 7) === passado).length,
+    voltaram: clientes.filter((c) => c.pedidos > 1).length,
+    novosPorMes,
+  };
+}
+
+// Variação em relação ao período anterior: "+25%", "-10%", "novo" ou "igual"
+export function variacao(atual: number, anterior: number): string {
+  if (anterior === 0) return atual > 0 ? "novo" : "igual";
+  const percentual = Math.round(((atual - anterior) / anterior) * 100);
+  if (percentual === 0) return "igual";
+  return `${percentual > 0 ? "+" : ""}${percentual}%`;
+}
+
+// Bolos mais vistos nos últimos 30 dias, com a tendência e quantas vezes foram alugados (12 meses)
+export function bolosMaisVistos(
+  visualizacoes: DadosDeClientes["visualizacoes"],
+  alugueisPorBolo: Map<string, number>,
+  limite = 10,
+) {
+  return visualizacoes
+    .map((v) => ({
+      codigo: v.codigo,
+      vistas: v.ultimos30 ?? 0,
+      anteriores: v.anteriores30 ?? 0,
+      alugueis: alugueisPorBolo.get(v.codigo) ?? 0,
+    }))
+    .filter((v) => v.vistas > 0)
+    .sort((a, b) => b.vistas - a.vistas || a.codigo.localeCompare(b.codigo))
+    .slice(0, limite);
+}
+
+// Muito vistos e nunca alugados: sinal de que a foto, o preço ou a descrição podem estar afastando
+export function vistosSemAluguel(maisVistos: ReturnType<typeof bolosMaisVistos>, minimoDeVistas = 10) {
+  return maisVistos.filter((v) => v.vistas >= minimoDeVistas && v.alugueis === 0);
+}
