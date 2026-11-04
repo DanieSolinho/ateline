@@ -15,4 +15,5 @@ export type Pedido = {
   status?: StatusDoPedido;
   guardadoAte?: string | null; // até quando as peças ficam guardadas esperando o sinal
   creditoUsado?: number; // parte do sinal paga com crédito em loja
+  ipAceite?: string | null; // IP de quem aceitou o contrato (vai no contrato em PDF)
 };

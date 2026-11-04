@@ -6,4 +6,6 @@ export const DESCONTO_VELA = 10; // vela acoplada que não volta
 export const ANTECEDENCIA_REFAZER_DIAS = 20; // bolo igual a um do acervo
 export const ANTECEDENCIA_BOLO_NOVO_DIAS = 20; // bolo novo, do jeito da cliente
 export const ANTECEDENCIA_ADIAMENTO_DIAS = 15; // adiar o aluguel: até 15 dias antes da festa
-export const VALIDADE_CREDITO_MESES = 3; // cancelamento com sinal pago: o sinal vira crédito por 3 meses
+export const VALIDADE_CREDITO_DIAS = 90; // cancelamento: por cortesia, o sinal fica como crédito na loja por 90 dias
+export const MINUTOS_PARA_PAGAR_SINAL = 30; // sinal imediato: as peças ficam guardadas só o tempo de fazer o Pix
+export const PRAZO_COMPRA_DIAS = 20; // compra: mínimo para produção e despacho (pode mudar conforme a agenda)

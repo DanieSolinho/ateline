@@ -22,6 +22,9 @@ export default async function ComprarPage() {
       <p className="mt-2 max-w-2xl text-lg text-ameixa-suave">
         Leve o bolo para sempre. Retire grátis na loja ou receba em casa, com envio para todo o Brasil.
       </p>
+      <p className="mt-2 max-w-2xl text-sm text-ameixa-suave">
+        Prazo mínimo de 20 dias para produção e despacho, conforme a agenda. Sinal de 50% para reservar o bolo.
+      </p>
 
       <ListaDeCompra bolos={bolos} vendidos={vendidos} />
     </main>

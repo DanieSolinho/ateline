@@ -27,7 +27,7 @@ import { mensagemDoSinal } from "@/lib/pedidos";
 import { linkWhatsApp } from "@/lib/contato";
 import { enderecoEmTexto } from "@/lib/endereco";
 import { formatarPreco } from "@/lib/formatar";
-import { ANTECEDENCIA_ADIAMENTO_DIAS, PERCENTUAL_SINAL, TAXA_SEGURANCA, VALIDADE_CREDITO_MESES } from "@/lib/regras";
+import { ANTECEDENCIA_ADIAMENTO_DIAS, PERCENTUAL_SINAL, TAXA_SEGURANCA, VALIDADE_CREDITO_DIAS } from "@/lib/regras";
 
 const MAPA_DA_LOJA =
   "https://www.google.com/maps/search/?api=1&query=" +
@@ -245,7 +245,7 @@ export function MinhaConta() {
             <h2 id="credito-titulo" className="font-display text-xl font-semibold">Crédito em loja</h2>
             {!sessao ? (
               <p className="text-sm text-ameixa-suave">
-                Em caso de cancelamento, o sinal vira crédito por {VALIDADE_CREDITO_MESES} meses. Entre na sua conta
+                Por cortesia, em caso de cancelamento o sinal fica como crédito na loja por {VALIDADE_CREDITO_DIAS} dias. Entre na sua conta
                 para ver e usar o seu saldo.
               </p>
             ) : credito === null ? (
@@ -256,7 +256,7 @@ export function MinhaConta() {
                 <p className="text-sm text-ameixa-suave">
                   {credito.saldo > 0 && credito.venceEm
                     ? `Use no checkout para pagar o sinal de um novo pedido. Vale até ${data(credito.venceEm.slice(0, 10))}.`
-                    : `Em caso de cancelamento, o sinal vira crédito por ${VALIDADE_CREDITO_MESES} meses.`}
+                    : `Por cortesia, em caso de cancelamento o sinal fica como crédito na loja por ${VALIDADE_CREDITO_DIAS} dias.`}
                 </p>
               </>
             )}

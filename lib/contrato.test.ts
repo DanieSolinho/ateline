@@ -74,6 +74,18 @@ describe("montarContrato", () => {
     expect(montarContrato({ ...pedido, itens: [compra] })).toBeNull();
   });
 
+  it("leva o IP do aceite quando o pedido tem", () => {
+    expect(texto({ ...pedido, ipAceite: "189.6.10.20" })).toContain("(horário de Brasília), IP 189.6.10.20, no pedido ATL-1001");
+    expect(texto(pedido)).toContain("(horário de Brasília), no pedido ATL-1001");
+  });
+
+  it("cancelamento: o sinal não é restituído e o contrato não promete crédito", () => {
+    const t = texto(pedido);
+    expect(t).toContain("o valor de entrada não será restituído");
+    expect(t).toContain("taxa de segurança, se já tiver sido paga, é devolvida integralmente");
+    expect(t).not.toContain("crédito");
+  });
+
   it("dá nome ao arquivo com o número do pedido", () => {
     expect(montarContrato(pedido)!.nomeDoArquivo).toBe("Contrato-Ateline-ATL-1001.pdf");
   });

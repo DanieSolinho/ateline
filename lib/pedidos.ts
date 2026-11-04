@@ -3,7 +3,7 @@ import type { DadosCheckout } from "@/lib/checkout";
 import type { ItemCarrinho } from "@/types/carrinho";
 import type { Pedido, StatusDoPedido } from "@/types/pedido";
 
-export type PedidoParaEnviar = Omit<Pedido, "numero" | "criadoEm" | "status" | "guardadoAte" | "creditoUsado"> & {
+export type PedidoParaEnviar = Omit<Pedido, "numero" | "criadoEm" | "status" | "guardadoAte" | "creditoUsado" | "ipAceite"> & {
   usarCredito?: boolean; // só vale para quem está logada e tem saldo
 };
 
@@ -15,6 +15,7 @@ export type ResultadoDoPedido =
       status: StatusDoPedido;
       pagoAgora: number; // o que falta pagar de sinal, já descontado o crédito
       creditoUsado: number;
+      ipAceite: string | null;
     }
   | { ok: false; mensagem: string };
 
@@ -65,6 +66,7 @@ export async function enviarPedido(pedido: PedidoParaEnviar): Promise<ResultadoD
     status?: StatusDoPedido;
     pagoAgora?: number | string;
     creditoUsado?: number | string;
+    ipAceite?: string | null;
   };
   return {
     ok: true,
@@ -73,6 +75,7 @@ export async function enviarPedido(pedido: PedidoParaEnviar): Promise<ResultadoD
     status: resposta.status ?? "aguardando_pagamento",
     pagoAgora: resposta.pagoAgora === undefined ? pedido.pagoAgora : Number(resposta.pagoAgora),
     creditoUsado: Number(resposta.creditoUsado ?? 0),
+    ipAceite: resposta.ipAceite ?? null,
   };
 }
 
@@ -88,6 +91,7 @@ export type LinhaDePedido = {
   na_retirada: number;
   restante_compra: number;
   credito_usado?: number;
+  ip_aceite?: string | null;
 };
 
 export function pedidoDaLinha(linha: LinhaDePedido): Pedido {
@@ -102,6 +106,7 @@ export function pedidoDaLinha(linha: LinhaDePedido): Pedido {
     naRetirada: Number(linha.na_retirada),
     restanteCompra: Number(linha.restante_compra),
     creditoUsado: Number(linha.credito_usado ?? 0),
+    ipAceite: linha.ip_aceite ?? null,
   };
 }
 
@@ -109,7 +114,7 @@ export function pedidoDaLinha(linha: LinhaDePedido): Pedido {
 export async function buscarMeusPedidos(): Promise<Pedido[] | null> {
   const { data, error } = await supabase
     .from("pedidos")
-    .select("numero, status, criado_em, guardado_ate, cliente, itens, pago_agora, na_retirada, restante_compra, credito_usado")
+    .select("numero, status, criado_em, guardado_ate, cliente, itens, pago_agora, na_retirada, restante_compra, credito_usado, ip_aceite")
     .order("criado_em");
   if (error) {
     console.warn("Não deu para buscar os pedidos:", error.message);

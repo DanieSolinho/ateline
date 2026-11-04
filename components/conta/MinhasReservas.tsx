@@ -17,7 +17,7 @@ import { situacaoDoPedido } from "@/lib/conta";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
-import { ANTECEDENCIA_ADIAMENTO_DIAS, VALIDADE_CREDITO_MESES } from "@/lib/regras";
+import { ANTECEDENCIA_ADIAMENTO_DIAS, VALIDADE_CREDITO_DIAS } from "@/lib/regras";
 import type { ItemAluguel } from "@/types/carrinho";
 import type { Pedido } from "@/types/pedido";
 
@@ -81,7 +81,7 @@ export function MinhasReservas({ pedidos, hoje, agora, aoMudar }: Props) {
       tipo: "sucesso",
       texto:
         resposta.credito > 0
-          ? `Pedido ${pedido.numero} cancelado. ${formatarPreco(resposta.credito)} viraram crédito em loja, válido por ${VALIDADE_CREDITO_MESES} meses.`
+          ? `Pedido ${pedido.numero} cancelado. ${formatarPreco(resposta.credito)} ficam como crédito na loja por ${VALIDADE_CREDITO_DIAS} dias, para outra locação ou qualquer produto da loja.`
           : `Pedido ${pedido.numero} cancelado. As peças voltaram para a agenda.`,
     });
     setAberto(null);
@@ -189,7 +189,7 @@ export function MinhasReservas({ pedidos, hoje, agora, aoMudar }: Props) {
               <div className="flex flex-col gap-3 rounded-xl bg-[#fce9df] p-4">
                 <p className="font-semibold">
                   {credito > 0
-                    ? `Cancelar o pedido ${pedido.numero}? O sinal de ${formatarPreco(credito)} não volta em dinheiro: ele vira crédito em loja, válido por ${VALIDADE_CREDITO_MESES} meses, para usar em outro aluguel.`
+                    ? `Cancelar o pedido ${pedido.numero}? Pelo contrato, o sinal de ${formatarPreco(credito)} não é devolvido. Por cortesia, ele fica como crédito na loja por ${VALIDADE_CREDITO_DIAS} dias, para outra locação ou qualquer produto da loja.`
                     : `Cancelar o pedido ${pedido.numero}? As peças voltam para a agenda.${pedido.creditoUsado ? " O crédito usado neste pedido volta para o seu saldo." : ""}`}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -233,7 +233,7 @@ export function MinhasReservas({ pedidos, hoje, agora, aoMudar }: Props) {
 
       <p className="text-sm text-ameixa-suave">
         Adiamento: até {ANTECEDENCIA_ADIAMENTO_DIAS} dias antes da festa, se o bolo estiver livre na nova data. Em
-        cancelamento, o sinal vira crédito em loja por {VALIDADE_CREDITO_MESES} meses.
+        cancelamento, o sinal não é devolvido; por cortesia, ele fica como crédito na loja por {VALIDADE_CREDITO_DIAS} dias.
       </p>
     </div>
   );

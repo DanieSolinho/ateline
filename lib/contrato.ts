@@ -3,7 +3,7 @@ import { diaPorExtenso, horarioDaLoja } from "@/lib/calendario";
 import { enderecoEmTexto } from "@/lib/endereco";
 import { formatarPreco, formatarTelefone } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
-import { DESCONTO_VELA, MULTA_POR_DIA, PERCENTUAL_SINAL, TAXA_SEGURANCA, VALIDADE_CREDITO_MESES } from "@/lib/regras";
+import { DESCONTO_VELA, MULTA_POR_DIA, PERCENTUAL_SINAL, TAXA_SEGURANCA } from "@/lib/regras";
 import { URL_DO_SITE } from "@/lib/site";
 import type { ItemAluguel } from "@/types/carrinho";
 import type { Pedido } from "@/types/pedido";
@@ -174,7 +174,7 @@ export function montarContrato(pedido: Pedido): Contrato | null {
     },
     {
       tipo: "item",
-      texto: `6.2. Havendo cancelamento ou adiamento da locação, o valor de entrada não é restituído em dinheiro. No cancelamento, ele é convertido em crédito em loja, válido por ${VALIDADE_CREDITO_MESES} meses. O adiamento pode ser feito até 15 dias antes da festa, se as peças estiverem livres na nova data.`,
+      texto: "6.2. Havendo cancelamento ou adiamento da locação, o valor de entrada não será restituído. A taxa de segurança, se já tiver sido paga, é devolvida integralmente em caso de cancelamento pela LOCATÁRIA.",
     },
 
     {
@@ -184,7 +184,7 @@ export function montarContrato(pedido: Pedido): Contrato | null {
     },
     {
       tipo: "destaque",
-      texto: `Aceite eletrônico de ${cliente.nome} pelo site ${URL_DO_SITE} em ${aceite.data}, às ${aceite.hora} (horário de Brasília), no pedido ${pedido.numero}.`,
+      texto: `Aceite eletrônico de ${cliente.nome} pelo site ${URL_DO_SITE} em ${aceite.data}, às ${aceite.hora} (horário de Brasília)${pedido.ipAceite ? `, IP ${pedido.ipAceite}` : ""}, no pedido ${pedido.numero}.`,
     },
     { tipo: "paragrafo", texto: `Rio de Janeiro, ${aceite.data}.` },
   ];

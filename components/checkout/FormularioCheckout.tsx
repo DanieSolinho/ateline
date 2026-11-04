@@ -18,7 +18,7 @@ import { salvarPerfil } from "@/lib/perfil";
 import { criarEsquemaCheckout, type CampoCheckout } from "@/lib/checkout";
 import { formatarPreco } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
-import { TAXA_SEGURANCA } from "@/lib/regras";
+import { MINUTOS_PARA_PAGAR_SINAL, PRAZO_COMPRA_DIAS, TAXA_SEGURANCA, VALIDADE_CREDITO_DIAS } from "@/lib/regras";
 
 type Estado = {
   erros: Partial<Record<CampoCheckout, string>>;
@@ -90,6 +90,7 @@ export function FormularioCheckout() {
       guardadoAte: resposta.guardadoAte,
       pagoAgora: resposta.pagoAgora, // já sem a parte paga com crédito
       creditoUsado: resposta.creditoUsado,
+      ipAceite: resposta.ipAceite,
     });
 
     // Logada: guarda os dados na conta para os próximos pedidos (sem fazer a cliente esperar)
@@ -261,6 +262,11 @@ export function FormularioCheckout() {
               </span>
             </label>
 
+            <p className="text-sm text-ameixa-suave">
+              Prazo: mínimo de {PRAZO_COMPRA_DIAS} dias para produção e despacho, conforme a agenda. Em caso de
+              desistência, o sinal não é devolvido; por cortesia, ele fica como crédito na loja por{" "}
+              {VALIDADE_CREDITO_DIAS} dias.
+            </p>
             {recebimento === "envio" && (
               <div className="flex flex-col gap-4">
                 {resumo.temAluguel ? (
@@ -271,6 +277,10 @@ export function FormularioCheckout() {
                 <p className="rounded-xl bg-blush p-3 text-sm">
                   Depois do pedido, você manda o endereço no WhatsApp com um toque e a Ateline orça o frete com a
                   transportadora. O restante da compra e o frete são pagos antes do envio.
+                </p>
+                <p className="text-sm text-ameixa-suave">
+                  A Ateline não se responsabiliza por avarias ou furto durante o transporte. A transportadora oferece
+                  seguro para esses casos.
                 </p>
               </div>
             )}
@@ -392,7 +402,7 @@ export function FormularioCheckout() {
         <p className="text-xs text-ameixa-suave">
           {descontoDoCredito > 0 && descontoDoCredito >= resumo.pagarAgora
             ? "O crédito cobre o sinal inteiro: o pedido já sai confirmado."
-            : "As peças ficam guardadas por 2 horas enquanto você paga o sinal pelo WhatsApp. Em breve, o pagamento será direto pelo Mercado Pago."}
+            : `A reserva só é garantida com o sinal pago na hora: as peças ficam guardadas por ${MINUTOS_PARA_PAGAR_SINAL} minutos enquanto você faz o Pix pelo WhatsApp. Em breve, o pagamento será direto pelo site.`}
         </p>
       </aside>
     </form>
