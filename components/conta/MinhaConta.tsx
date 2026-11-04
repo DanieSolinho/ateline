@@ -6,6 +6,8 @@ import { CalendarClock, MapPin, MessageCircle } from "lucide-react";
 import { CartaoDaConta } from "@/components/conta/CartaoDaConta";
 import { MeusDados } from "@/components/conta/MeusDados";
 import { MinhaSenha } from "@/components/conta/MinhaSenha";
+import { PagamentoPix } from "@/components/PagamentoPix";
+import { pixConfigurado } from "@/lib/pix";
 import { MinhasReservas } from "@/components/conta/MinhasReservas";
 import { BotaoContrato } from "@/components/conta/BotaoContrato";
 import { apagarPedidos, usePedidos } from "@/hooks/usePedidos";
@@ -175,7 +177,23 @@ export function MinhaConta() {
                     </span>
                   </div>
                 </div>
-                {proximaAguardando && (
+                {proximaAguardando && pixConfigurado() && proxima.pedido.cliente.pagamento !== "cartao" && (
+                  <details className="rounded-xl bg-pessego/60 p-3 text-sm" open>
+                    <summary className="cursor-pointer font-semibold">
+                      Pague o sinal de {formatarPreco(proxima.pedido.pagoAgora)} por Pix
+                      {proxima.pedido.guardadoAte && <> até {diaEHora(proxima.pedido.guardadoAte)}</>} para garantir a
+                      reserva
+                    </summary>
+                    <div className="mt-3 rounded-xl bg-white p-3">
+                      <PagamentoPix
+                        numero={proxima.pedido.numero}
+                        valor={proxima.pedido.pagoAgora}
+                        guardadoAte={proxima.pedido.guardadoAte}
+                      />
+                    </div>
+                  </details>
+                )}
+                {proximaAguardando && (!pixConfigurado() || proxima.pedido.cliente.pagamento === "cartao") && (
                   <p className="rounded-xl bg-pessego/60 p-3 text-sm">
                     Pague o sinal de <strong>{formatarPreco(proxima.pedido.pagoAgora)}</strong>
                     {proxima.pedido.guardadoAte && <> até {diaEHora(proxima.pedido.guardadoAte)}</>} para garantir a

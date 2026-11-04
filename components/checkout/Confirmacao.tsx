@@ -4,6 +4,8 @@ import Link from "next/link";
 import { CircleCheck, MessageCircle } from "lucide-react";
 import { BotaoContrato } from "@/components/conta/BotaoContrato";
 import { useUltimoPedido } from "@/hooks/usePedidos";
+import { PagamentoPix } from "@/components/PagamentoPix";
+import { pixConfigurado } from "@/lib/pix";
 import { diaEHora, diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { chaveDoItem } from "@/lib/carrinho";
 import { formatarCep } from "@/lib/cep";
@@ -38,7 +40,10 @@ export function Confirmacao() {
   const envio = temCompra && cliente.recebimento === "envio";
   const linkFrete = envio ? linkWhatsApp(mensagemOrcamentoFrete(pedido)) : null;
   const aguardandoSinal = pedido.status === "aguardando_pagamento";
-  const linkSinal = aguardandoSinal ? linkWhatsApp(mensagemDoSinal(pedido, formatarPreco(pedido.pagoAgora))) : null;
+  // Pix direto na conta da loja (quem escolheu cartão continua pelo WhatsApp, que manda o link do cartão)
+  const pagarComPix = aguardandoSinal && pedido.pagoAgora > 0 && pixConfigurado() && cliente.pagamento !== "cartao";
+  const linkSinal =
+    aguardandoSinal && !pagarComPix ? linkWhatsApp(mensagemDoSinal(pedido, formatarPreco(pedido.pagoAgora))) : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -58,6 +63,25 @@ export function Confirmacao() {
           Usamos {formatarPreco(pedido.creditoUsado ?? 0)} do seu crédito em loja
           {aguardandoSinal ? " para pagar parte do sinal." : " e ele pagou o sinal inteiro. Sua reserva está garantida."}
         </p>
+      )}
+
+      {pagarComPix && (
+        <section aria-labelledby="pix-titulo" className="flex flex-col items-start gap-4 rounded-2xl border-2 border-framboesa p-5">
+          <h2 id="pix-titulo" className="font-display text-xl font-semibold">
+            Agora, pague o sinal de {formatarPreco(pedido.pagoAgora)} por Pix
+          </h2>
+          <p>
+            A reserva só é garantida com o sinal pago.
+            {pedido.guardadoAte && (
+              <>
+                {" "}
+                Guardamos as peças até <strong>{diaEHora(pedido.guardadoAte)}</strong>; depois disso, elas voltam para a
+                agenda.
+              </>
+            )}
+          </p>
+          <PagamentoPix numero={pedido.numero} valor={pedido.pagoAgora} guardadoAte={pedido.guardadoAte} />
+        </section>
       )}
 
       {linkSinal && (

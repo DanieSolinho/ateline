@@ -402,7 +402,7 @@ export function FormularioCheckout() {
         <p className="text-xs text-ameixa-suave">
           {descontoDoCredito > 0 && descontoDoCredito >= resumo.pagarAgora
             ? "O crédito cobre o sinal inteiro: o pedido já sai confirmado."
-            : `A reserva só é garantida com o sinal pago na hora: as peças ficam guardadas por ${MINUTOS_PARA_PAGAR_SINAL} minutos enquanto você faz o Pix pelo WhatsApp. Em breve, o pagamento será direto pelo site.`}
+            : `A reserva só é garantida com o sinal pago na hora: depois de finalizar, aparece o Pix da Ateline com o valor certo, e as peças ficam guardadas por ${MINUTOS_PARA_PAGAR_SINAL} minutos enquanto você paga.`}
         </p>
       </aside>
     </form>

@@ -55,8 +55,13 @@ test("cliente aluga um bolo, do catálogo até o pedido recebido", async ({ page
 
   await expect(page).toHaveURL(/confirmado/);
   await expect(page.getByRole("heading", { name: "Pedido recebido, Maria!" })).toBeVisible();
-  await expect(page.getByText("ATL-1001")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Pagar o sinal pelo WhatsApp" })).toBeVisible();
+  await expect(page.getByText("ATL-1001").first()).toBeVisible();
+  // O sinal é pago por Pix direto na conta da loja: QR Code e copia e cola com o valor e o número do pedido
+  await expect(page.getByRole("heading", { name: /pague o sinal de .* por Pix/ })).toBeVisible();
+  const codigoPix = await page.getByLabel("Pix copia e cola").inputValue();
+  expect(codigoPix).toContain("br.gov.bcb.pix");
+  expect(codigoPix).toContain("ATL1001");
+  await expect(page.getByRole("img", { name: /QR Code do Pix/ })).toBeVisible();
 
   // O que foi para o banco: o bolo, a personalização e os valores calculados pelo site
   const enviado = pedidosEnviados[0] as { pedido: { itens: { personalizacao: string }[]; pagoAgora: number } };
