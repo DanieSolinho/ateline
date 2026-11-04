@@ -13,10 +13,18 @@ describe("linhasDePreco", () => {
   });
 
   it("opções de bolo fora do site (manutenção, inativo) ficam inativas", () => {
-    const safari = linhas.find((linha) => linha.codigo_bolo === "SAFARI_001");
-    const jardim = linhas.find((linha) => linha.codigo_bolo === "JARDIM_001"); // em manutenção na planilha
-    expect(safari).toMatchObject({ tipo: "opcao", ativo: true });
-    expect(jardim).toMatchObject({ tipo: "opcao", ativo: false });
+    // Não depende de quais bolos estão na planilha: marca o primeiro bolo como em manutenção.
+    const [primeiro, ...resto] = catalogo.bolos;
+    const comManutencao: Catalogo = {
+      ...catalogo,
+      bolos: [{ ...primeiro, status: "manutencao" }, ...resto],
+    };
+    const outras = linhasDePreco(comManutencao);
+    const doPrimeiro = outras.filter((linha) => linha.codigo_bolo === primeiro.codigo);
+    const dosOutros = outras.filter((linha) => linha.tipo === "opcao" && linha.codigo_bolo !== primeiro.codigo);
+    expect(doPrimeiro.length).toBeGreaterThan(0);
+    expect(doPrimeiro.every((linha) => linha.ativo === false)).toBe(true);
+    expect(dosOutros.some((linha) => linha.ativo)).toBe(true);
   });
 
   it("topos e bases levam o preço de locação", () => {
