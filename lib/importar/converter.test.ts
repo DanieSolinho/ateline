@@ -122,3 +122,16 @@ describe("cupom dos bolos refeitos", () => {
     expect(converter({ cupom: { codigo: "REFAZ", desconto: 0 } }).erros[0]).toContain("desconto");
   });
 });
+
+describe("colunas de destaque e valor de reposição", () => {
+  it("lê o destaque e o valor de reposição de cada bolo", () => {
+    const { catalogo } = converter({
+      bolos: [{ ...safari, "Destaque na página inicial?": "Sim", "Valor de reposição (R$)": 800 }],
+    });
+    expect(catalogo.bolos[0]).toMatchObject({ destaque: true, valorReposicao: 800 });
+  });
+
+  it("sem as colunas preenchidas, não é destaque e não tem valor", () => {
+    expect(converter().catalogo.bolos[0]).toMatchObject({ destaque: false, valorReposicao: null });
+  });
+});

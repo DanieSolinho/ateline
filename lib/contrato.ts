@@ -1,5 +1,6 @@
 import { totalDoItem } from "@/lib/carrinho";
 import { diaPorExtenso, horarioDaLoja } from "@/lib/calendario";
+import { valorDeReposicao } from "@/lib/catalogo";
 import { enderecoEmTexto } from "@/lib/endereco";
 import { formatarPreco, formatarTelefone } from "@/lib/formatar";
 import { calcularPeriodo } from "@/lib/periodo";
@@ -52,6 +53,13 @@ export function descricaoDoItem(item: ItemAluguel): string {
   const comExtras = extras.length > 0 ? `, com ${extras.join(" e ")}` : "";
   const personalizacao = item.personalizacao ? ` (${item.personalizacao})` : "";
   return `${item.nome}${comExtras}${personalizacao}`;
+}
+
+// "Safari · 3 andares: R$ 800,00; Circo: R$ 650,00" (bolos sem valor na planilha: pela tabela da loja)
+function textoDaReposicao(alugueis: ItemAluguel[]): string {
+  const valores = alugueis.map((item) => ({ nome: item.nome, valor: valorDeReposicao(item.codigoBolo) }));
+  if (valores.some((v) => v.valor === null)) return ", conforme a tabela de reposição da LOCADORA";
+  return `: ${valores.map((v) => `${v.nome}, ${formatarPreco(v.valor!)}`).join("; ")}`;
 }
 
 function dia(iso: string) {
@@ -169,8 +177,7 @@ export function montarContrato(pedido: Pedido): Contrato | null {
     { tipo: "titulo", texto: "6. DO VALOR DAS PEÇAS, DO CANCELAMENTO E DO ADIAMENTO" },
     {
       tipo: "item",
-      texto:
-        "6.1. Em caso de perda, é cobrado da LOCATÁRIA o valor integral das peças, conforme a tabela de reposição da LOCADORA.",
+      texto: `6.1. Em caso de perda, é cobrado da LOCATÁRIA o valor integral das peças${textoDaReposicao(alugueis)}.`,
     },
     {
       tipo: "item",

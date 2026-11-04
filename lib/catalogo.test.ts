@@ -86,3 +86,19 @@ describe("data/catalogo.json", () => {
     }
   });
 });
+
+describe("destaques da página inicial", () => {
+  it("usa os marcados na planilha (até 4) e, sem nenhum marcado, os 4 primeiros", async () => {
+    const { escolherDestaques } = await import("./catalogo");
+    const lista = ["A", "B", "C", "D", "E", "F"].map((letra, i) => ({ codigo: letra, destaque: i === 1 || i === 4 }));
+    expect(escolherDestaques(lista as never).map((b) => b.codigo)).toEqual(["B", "E"]);
+    expect(escolherDestaques(lista.map((b) => ({ ...b, destaque: false })) as never).map((b) => b.codigo)).toEqual(["A", "B", "C", "D"]);
+  });
+
+  it("acha o valor de reposição do bolo", async () => {
+    const { valorDeReposicao } = await import("./catalogo");
+    const dados = { bolos: [{ codigo: "A", valorReposicao: 800 }, { codigo: "B" }], topos: [], bases: [] };
+    expect(valorDeReposicao("A", dados as never)).toBe(800);
+    expect(valorDeReposicao("B", dados as never)).toBeNull();
+  });
+});

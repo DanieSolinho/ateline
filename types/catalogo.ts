@@ -18,6 +18,8 @@ export type BoloCatalogo = {
   status: StatusPeca;
   previsaoVolta: string | null; // "2026-10-28"
   podeSerRefeito: boolean;
+  destaque?: boolean; // aparece na página inicial
+  valorReposicao?: number | null; // quanto custa repor a peça se for perdida (vai no contrato)
 };
 
 // Aba "Opções de aluguel": uma linha por decoração + número de andares

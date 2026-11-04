@@ -43,9 +43,19 @@ export async function getBoloDaVitrine(codigo: string): Promise<BoloVitrine | un
   return (await getVitrine()).find((bolo) => bolo.codigo === codigo);
 }
 
-// A planilha ainda não tem coluna de destaque: por enquanto, os 4 primeiros
+// Os bolos marcados como destaque na planilha (até 4). Sem nenhum marcado, os 4 primeiros.
+export function escolherDestaques(vitrine: BoloVitrine[], maximo = 4): BoloVitrine[] {
+  const marcados = vitrine.filter((bolo) => bolo.destaque);
+  return (marcados.length > 0 ? marcados : vitrine).slice(0, maximo);
+}
+
 export async function getDestaques(): Promise<BoloVitrine[]> {
-  return (await getVitrine()).slice(0, 4);
+  return escolherDestaques(await getVitrine());
+}
+
+// Quanto custa repor o bolo, se a planilha tiver o valor (vai no contrato)
+export function valorDeReposicao(codigo: string, dadosDoCatalogo: Catalogo = catalogo): number | null {
+  return dadosDoCatalogo.bolos.find((b) => b.codigo === codigo)?.valorReposicao ?? null;
 }
 
 export async function getTopos(codigos: string[]): Promise<Acessorio[]> {

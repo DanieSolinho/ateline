@@ -106,6 +106,8 @@ export function converterCatalogo(planilha: {
       status: status(linha["Status"], onde),
       previsaoVolta: texto(linha["Previsão de volta"]) || null,
       podeSerRefeito: chave(linha["Pode ser refeito?"]) === "sim",
+      destaque: chave(linha["Destaque na página inicial?"]) === "sim",
+      valorReposicao: numero(linha["Valor de reposição (R$)"]),
     });
   }
 
