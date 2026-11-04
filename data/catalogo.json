@@ -12,7 +12,9 @@
       "personalizacao": "nome_idade",
       "status": "disponivel",
       "previsaoVolta": null,
-      "podeSerRefeito": false
+      "podeSerRefeito": false,
+      "destaque": true,
+      "valorReposicao": 800
     },
     {
       "codigo": "JARDIM_001",
@@ -29,7 +31,9 @@
       "personalizacao": "nome",
       "status": "manutencao",
       "previsaoVolta": "2026-10-28",
-      "podeSerRefeito": false
+      "podeSerRefeito": false,
+      "destaque": false,
+      "valorReposicao": 650
     }
   ],
   "opcoes": [
