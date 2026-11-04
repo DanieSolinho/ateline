@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { KeyRound } from "lucide-react";
-import { CampoSenha } from "@/components/painel/CampoSenha";
+import { CampoSenha } from "@/components/CampoSenha";
 import { definirSenha, problemaDaSenha, SENHA_MINIMA } from "@/lib/senha";
 
 // Criar ou trocar a senha da equipe, para entrar pelo app instalado no celular

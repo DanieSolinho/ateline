@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CampoSenha } from "@/components/painel/CampoSenha";
+import { CampoSenha } from "@/components/CampoSenha";
 import { abertoComoApp } from "@/lib/instalar";
 import { entrarComSenha } from "@/lib/senha";
 
