@@ -1,5 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
+import { readFileSync } from "node:fs";
 import { simularSupabase } from "./supabase-simulado";
+
+// Os testes usam um bolo da planilha de verdade (data/catalogo.json), para não quebrarem
+// quando a dona troca os bolos: um bolo disponível, com nome e idade, e com nome único.
+type BoloDaPlanilha = { codigo: string; nome: string; status: string; personalizacao: string };
+const { bolos } = JSON.parse(readFileSync("data/catalogo.json", "utf8")) as { bolos: BoloDaPlanilha[] };
+const nomeUnico = (bolo: BoloDaPlanilha) => bolos.filter((outro) => outro.nome === bolo.nome).length === 1;
+const BOLO =
+  bolos.find((bolo) => bolo.status === "disponivel" && bolo.personalizacao === "nome_idade" && nomeUnico(bolo)) ??
+  (() => {
+    throw new Error("A planilha precisa de pelo menos 1 bolo disponível, com 'Nome e idade' e nome único, para os testes.");
+  })();
 
 // Escolhe no calendário o primeiro dia livre do mês que vem
 async function escolherDiaLivre(page: Page) {
@@ -37,7 +49,7 @@ test("cliente aluga um bolo, do catálogo até o pedido recebido", async ({ page
   const { pedidosEnviados } = await simularSupabase(page);
 
   await page.goto("alugar/");
-  await page.getByRole("link", { name: "Escolher tamanho e data" }).first().click();
+  await page.locator(`a[href$="bolo/${BOLO.codigo}/"]`).first().click();
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
   await page.getByLabel("Nome no bolo").fill("Alice");
@@ -70,9 +82,9 @@ test("cliente aluga um bolo, do catálogo até o pedido recebido", async ({ page
 });
 
 test("checkout mostra o aviso quando outra cliente reservou o bolo antes", async ({ page }) => {
-  await simularSupabase(page, { respostaDoPedido: { erro: "PECA_RESERVADA:SAFARI_001" } });
+  await simularSupabase(page, { respostaDoPedido: { erro: `PECA_RESERVADA:${BOLO.codigo}` } });
 
-  await page.goto("bolo/SAFARI_001/");
+  await page.goto(`bolo/${BOLO.codigo}/`);
   await page.getByLabel("Nome no bolo").fill("Alice");
   await page.getByLabel("Idade").fill("5");
   await escolherDiaLivre(page);
@@ -91,18 +103,18 @@ test("dias reservados aparecem ocupados no calendário", async ({ page }) => {
   const hoje = new Date();
   const mesQueVem = new Date(Date.UTC(hoje.getUTCFullYear(), hoje.getUTCMonth() + 1, 15));
   const festa = mesQueVem.toISOString().slice(0, 10);
-  await simularSupabase(page, { reservas: [{ codigo: "SAFARI_001", festa }] });
+  await simularSupabase(page, { reservas: [{ codigo: BOLO.codigo, festa }] });
 
-  await page.goto("bolo/SAFARI_001/");
+  await page.goto(`bolo/${BOLO.codigo}/`);
   await page.getByRole("button", { name: "Próximo mês" }).click();
   await expect(page.locator(`button[aria-label^="15 de"]`)).toHaveAttribute("aria-label", /reservado/);
 });
 
 test("bolo vendido não aparece mais para aluguel", async ({ page }) => {
-  await simularSupabase(page, { vendidos: ["SAFARI_001"] });
+  await simularSupabase(page, { vendidos: [BOLO.codigo] });
 
-  await page.goto("bolo/SAFARI_001/");
+  await page.goto(`bolo/${BOLO.codigo}/`);
   await expect(page.getByText("Este bolo foi vendido")).toBeVisible();
   await page.goto("alugar/");
-  await expect(page.getByRole("heading", { name: "Safari", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: BOLO.nome, exact: true })).toHaveCount(0);
 });
