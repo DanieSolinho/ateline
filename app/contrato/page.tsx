@@ -48,7 +48,10 @@ export default function ContratoPage() {
           <li>Devolva a peça limpa e em bom estado.</li>
           <li>Havendo dano, é feito um orçamento do conserto, pago por quem alugou.</li>
           <li>Atraso na devolução: multa de 30% por dia sobre o valor total.</li>
-          <li>Em caso de perda, é cobrado o valor integral da peça, informado no contrato.</li>
+          <li>
+            Se a peça não for devolvida, for perdida ou voltar danificada sem conserto, é cobrado o valor de reposição
+            da peça, informado no contrato.
+          </li>
         </ul>
       </section>
     </PaginaDeTexto>
