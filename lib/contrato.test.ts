@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { dataEHoraNoRio, descricaoDoItem, enderecoDaCliente, montarContrato } from "@/lib/contrato";
 import { textoParaPdf } from "@/lib/contratoPdf";
+import dados from "@/data/catalogo.json";
 import type { ItemAluguel } from "@/types/carrinho";
+import type { Catalogo } from "@/types/catalogo";
 import type { Pedido } from "@/types/pedido";
 
 const safari: ItemAluguel = {
@@ -77,6 +79,21 @@ describe("montarContrato", () => {
   it("leva o IP do aceite quando o pedido tem", () => {
     expect(texto({ ...pedido, ipAceite: "189.6.10.20" })).toContain("(horário de Brasília), IP 189.6.10.20, no pedido ATL-1001");
     expect(texto(pedido)).toContain("(horário de Brasília), no pedido ATL-1001");
+  });
+
+  it("reposição: vale para peça perdida, não devolvida ou danificada sem conserto", () => {
+    const t = texto(pedido);
+    expect(t).toContain("não for devolvida, for perdida ou voltar danificada a ponto de não ter conserto");
+    // bolo sem valor na planilha (SAFARI_001 não existe mais): remete à tabela da loja
+    expect(t).toContain("valor de reposição da peça, conforme a tabela de reposição da LOCADORA");
+  });
+
+  const comValor = (dados as Catalogo).bolos.find((bolo) => bolo.valorReposicao);
+  it.skipIf(!comValor)("reposição: mostra o valor da planilha quando o bolo tem", () => {
+    const item = { ...safari, codigoBolo: comValor!.codigo, nome: comValor!.nome };
+    const valor = comValor!.valorReposicao!.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    expect(texto({ ...pedido, itens: [item] })).toContain(`valor de reposição da peça: ${comValor!.nome}, R$`);
+    expect(texto({ ...pedido, itens: [item] })).toContain(valor);
   });
 
   it("cancelamento: o sinal não é restituído e o contrato não promete crédito", () => {

@@ -177,7 +177,7 @@ export function montarContrato(pedido: Pedido): Contrato | null {
     { tipo: "titulo", texto: "6. DO VALOR DAS PEÇAS, DO CANCELAMENTO E DO ADIAMENTO" },
     {
       tipo: "item",
-      texto: `6.1. Em caso de perda, é cobrado da LOCATÁRIA o valor integral das peças${textoDaReposicao(alugueis)}.`,
+      texto: `6.1. Se a peça não for devolvida, for perdida ou voltar danificada a ponto de não ter conserto, é cobrado da LOCATÁRIA o valor de reposição da peça${textoDaReposicao(alugueis)}.`,
     },
     {
       tipo: "item",
