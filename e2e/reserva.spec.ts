@@ -118,3 +118,25 @@ test("bolo vendido não aparece mais para aluguel", async ({ page }) => {
   await page.goto("alugar/");
   await expect(page.getByRole("heading", { name: BOLO.nome, exact: true })).toHaveCount(0);
 });
+
+test("aluguel com entrega: depois de reservar, a cliente combina a entrega pelo WhatsApp", async ({ page }) => {
+  await simularSupabase(page);
+
+  await page.goto(`bolo/${BOLO.codigo}/`);
+  await page.getByLabel("Nome no bolo").fill("Alice");
+  await page.getByLabel("Idade").fill("5");
+  await escolherDiaLivre(page);
+  await page.getByRole("button", { name: /Reservar e pagar sinal/ }).click();
+  await page.getByRole("link", { name: "Continuar" }).click();
+  await preencherCheckout(page);
+  await page.getByText("Entrega no endereço").click();
+  await page.getByRole("button", { name: "Finalizar pedido" }).click();
+
+  await expect(page).toHaveURL(/confirmado/);
+  const botao = page.getByRole("link", { name: "Combinar a entrega no WhatsApp" });
+  await expect(botao).toBeVisible();
+  const link = decodeURIComponent((await botao.getAttribute("href")) ?? "");
+  expect(link).toContain("wa.me/");
+  expect(link).toContain("entregam no meu bairro");
+  expect(link).toContain("Praça Seca · Rio de Janeiro/RJ");
+});

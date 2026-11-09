@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mensagemOrcamentoFrete } from "./frete";
+import { mensagemEntregaAluguel, mensagemOrcamentoFrete } from "./frete";
 import type { Pedido } from "@/types/pedido";
 
 const pedido = {
@@ -36,5 +36,23 @@ describe("mensagemOrcamentoFrete", () => {
     expect(mensagem).toContain("Avenida Paulista, 1000 (apto 12)");
     expect(mensagem).toContain("São Paulo/SP");
     expect(mensagem).toContain("CEP 01310-100");
+  });
+});
+
+describe("mensagemEntregaAluguel", () => {
+  it("leva a reserva, o bolo com as datas e o endereço, e pergunta se entregam no bairro", () => {
+    const aluguel = {
+      tipo: "aluguel", codigoBolo: "ABELHINHA_001", codigoOpcao: "ABELHINHA_001_3A", nome: "Abelhinha · 3 andares",
+      festa: "2026-12-05", precoOpcao: 100, topo: null, base: null, personalizacao: null,
+    };
+    const mensagem = mensagemEntregaAluguel({
+      ...pedido,
+      cliente: { ...pedido.cliente, entrega: "entrega", bairro: "Praça Seca", cidade: "Rio de Janeiro", uf: "RJ" },
+      itens: [aluguel],
+    } as Pedido);
+    expect(mensagem).toContain("reserva ATL-123456");
+    expect(mensagem).toContain("entregam no meu bairro");
+    expect(mensagem).toMatch(/• Abelhinha · 3 andares: festa .*05\/12.*, entrega .*04\/12/);
+    expect(mensagem).toContain("Praça Seca · Rio de Janeiro/RJ");
   });
 });

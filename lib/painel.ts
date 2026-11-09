@@ -16,6 +16,8 @@ export type PedidoDaAgenda = {
   whatsapp: string | null;
   chavePix: string | null;
   itens: ItemCarrinho[];
+  entrega?: "retirada" | "entrega" | null; // aluguel com entrega no endereço (SQL 14)
+  bairro?: string | null;
 };
 
 export type ReservaDaAgenda = {

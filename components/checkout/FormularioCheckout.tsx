@@ -236,7 +236,11 @@ export function FormularioCheckout() {
                 onChange={() => setEntrega("entrega")} className="mt-1 size-5 accent-framboesa" />
               <span>
                 <strong className="block">Entrega no endereço</strong>
-                <span className="text-sm text-ameixa-suave">No endereço acima. Valor de acordo com o bairro, combinado pelo WhatsApp</span>
+                <span className="text-sm text-ameixa-suave">
+                  Só em alguns bairros. Depois de reservar, você confirma pelo WhatsApp se entregamos no endereço acima
+                  e o valor. <strong className="text-ameixa">Se não entregarmos no seu bairro, você retira o bolo na
+                  loja.</strong>
+                </span>
               </span>
             </label>
           </fieldset>

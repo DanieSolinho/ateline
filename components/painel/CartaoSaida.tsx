@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, MessageCircle } from "lucide-react";
+import { Check, MessageCircle, Truck } from "lucide-react";
 import { FotosDaPeca } from "@/components/painel/FotosDaPeca";
 import { formatarPreco } from "@/lib/formatar";
 import { pastaDoGrupo } from "@/lib/fotos";
@@ -42,6 +42,16 @@ export function CartaoSaida({ grupo, aoMudar }: { grupo: GrupoDaAgenda; aoMudar:
       {grupo.item && (
         <p className="text-sm">
           Receber: <strong>{formatarPreco(receberNaRetirada(grupo.item, TAXA_SEGURANCA))}</strong> (restante + taxa)
+        </p>
+      )}
+      {grupo.pedido?.entrega === "entrega" && (
+        <p className="flex items-start gap-2 rounded-lg bg-[#e6f2ea] px-3 py-2 text-sm">
+          <Truck size={18} aria-hidden className="mt-0.5 shrink-0 text-folha" />
+          <span>
+            <strong>Pediu entrega no endereço</strong>
+            {grupo.pedido.bairro ? ` · ${grupo.pedido.bairro}` : ""}. Confirme no WhatsApp se a loja atende o bairro e o
+            valor. Se não atender, a cliente retira na loja.
+          </span>
         </p>
       )}
       {grupo.pedido?.status === "aguardando_pagamento" && (

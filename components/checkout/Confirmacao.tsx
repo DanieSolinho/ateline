@@ -11,7 +11,7 @@ import { chaveDoItem } from "@/lib/carrinho";
 import { formatarCep } from "@/lib/cep";
 import { linkWhatsApp } from "@/lib/contato";
 import { formatarPreco } from "@/lib/formatar";
-import { mensagemOrcamentoFrete } from "@/lib/frete";
+import { mensagemEntregaAluguel, mensagemOrcamentoFrete } from "@/lib/frete";
 import { mensagemDoSinal } from "@/lib/pedidos";
 import { calcularPeriodo } from "@/lib/periodo";
 
@@ -39,6 +39,8 @@ export function Confirmacao() {
   const temCompra = pedido.itens.some((item) => item.tipo === "compra");
   const envio = temCompra && cliente.recebimento === "envio";
   const linkFrete = envio ? linkWhatsApp(mensagemOrcamentoFrete(pedido)) : null;
+  // Aluguel com entrega: a reserva está feita; a entrega (bairro e valor) é combinada pelo WhatsApp
+  const linkEntrega = temAluguel && cliente.entrega === "entrega" ? linkWhatsApp(mensagemEntregaAluguel(pedido)) : null;
   const aguardandoSinal = pedido.status === "aguardando_pagamento";
   // Pix direto na conta da loja (quem escolheu cartão continua pelo WhatsApp, que manda o link do cartão)
   const pagarComPix = aguardandoSinal && pedido.pagoAgora > 0 && pixConfigurado() && cliente.pagamento !== "cartao";
@@ -104,6 +106,25 @@ export function Confirmacao() {
             className="flex h-12 items-center gap-2 rounded-xl bg-framboesa px-5 font-bold text-white hover:bg-framboesa-escura"
           >
             <MessageCircle size={20} aria-hidden /> Pagar o sinal pelo WhatsApp
+          </a>
+        </section>
+      )}
+
+      {linkEntrega && (
+        <section className="flex flex-col items-start gap-3 rounded-2xl border-2 border-folha p-5">
+          <h2 className="font-display text-xl font-semibold">Próximo passo: combinar a entrega</h2>
+          <p>
+            A Ateline entrega só em alguns bairros. Mande seu endereço pelo WhatsApp para saber se atendemos aí e o
+            valor da entrega. <strong>Se não entregarmos no seu bairro, você retira o bolo na loja</strong>, na data de
+            retirada. Sua reserva continua garantida.
+          </p>
+          <a
+            href={linkEntrega}
+            target="_blank"
+            rel="noopener"
+            className="flex h-12 items-center gap-2 rounded-xl bg-folha px-5 font-bold text-white hover:opacity-90"
+          >
+            <MessageCircle size={20} aria-hidden /> Combinar a entrega no WhatsApp
           </a>
         </section>
       )}
