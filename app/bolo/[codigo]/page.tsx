@@ -4,11 +4,13 @@ import { notFound } from "next/navigation";
 import { MontarReserva } from "@/components/bolo/MontarReserva";
 import { BotaoFavorito } from "@/components/BotaoFavorito";
 import { ContarVisualizacao } from "@/components/bolo/ContarVisualizacao";
+import { GaleriaDoBolo } from "@/components/bolo/GaleriaDoBolo";
 import { getBases, getBoloDaVitrine, getTopos, getVitrine } from "@/lib/catalogo";
 import { formatarPreco } from "@/lib/formatar";
+import { fotosDe, nomeDaOpcao, type FotoDoBolo } from "@/lib/fotosDosBolos";
 import { getReservas } from "@/lib/reservas";
 import { getVendidos } from "@/lib/vendas";
-import { IMAGEM_DE_COMPARTILHAR, urlCompleta } from "@/lib/site";
+import { IMAGEM_DE_COMPARTILHAR, ORIGEM, urlCompleta } from "@/lib/site";
 
 // O site é estático: geramos uma página para cada bolo da vitrine na hora de publicar
 export async function generateStaticParams() {
@@ -18,6 +20,14 @@ export async function generateStaticParams() {
 
 // Códigos que não estão na vitrine dão 404
 export const dynamicParams = false;
+
+// Fotos do bolo e, depois, as de cada opção (tamanho/decoração)
+function fotosDaPagina(bolo: NonNullable<Awaited<ReturnType<typeof getBoloDaVitrine>>>): FotoDoBolo[] {
+  return [
+    ...fotosDe(bolo.codigo, bolo.nome),
+    ...bolo.opcoes.flatMap((opcao) => fotosDe(opcao.codigo, nomeDaOpcao(bolo.nome, opcao.andares, opcao.decoracao))),
+  ];
+}
 
 export async function generateMetadata({ params }: PageProps<"/bolo/[codigo]">): Promise<Metadata> {
   const { codigo } = await params;
@@ -41,7 +51,10 @@ export async function generateMetadata({ params }: PageProps<"/bolo/[codigo]">):
       siteName: "Ateline Ateliê",
       title: `${bolo.nome} | Ateline`,
       description: descricao,
-      images: [IMAGEM_DE_COMPARTILHAR],
+      // Com foto, o link compartilhado mostra o bolo; sem foto, a imagem padrão do site
+      images: fotosDaPagina(bolo)[0]
+        ? [{ url: `${ORIGEM}${fotosDaPagina(bolo)[0].grande}`, alt: bolo.nome }]
+        : [IMAGEM_DE_COMPARTILHAR],
     },
   };
 }
@@ -69,8 +82,8 @@ export default async function BoloPage({ params }: PageProps<"/bolo/[codigo]">) 
       </nav>
 
       <div className="grid gap-10 md:grid-cols-2">
-        <div className="grid aspect-[4/5] place-items-center rounded-3xl bg-rosa text-ameixa-suave md:sticky md:top-4">
-          Foto em breve
+        <div className="md:sticky md:top-4 md:self-start">
+          <GaleriaDoBolo fotos={fotosDaPagina(bolo)} nome={bolo.nome} />
         </div>
 
         <div className="flex flex-col gap-6">

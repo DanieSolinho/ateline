@@ -10,7 +10,7 @@ Loja online da **Ateline Ateliê** ([@atelineatelie](https://www.instagram.com/a
 | --- | --- |
 | ![Página do bolo](docs/bolo.png) | ![Catálogo no celular](docs/celular.png) |
 
-> As fotos dos bolos ainda estão sendo produzidas. Por enquanto, os cards mostram "Foto em breve".
+> As fotos dos bolos ainda estão sendo produzidas. Bolo sem foto mostra "Foto em breve"; com foto, o site já exibe sozinho (veja `npm run fotos`).
 
 ## O problema
 
@@ -68,6 +68,7 @@ flowchart LR
 - **Regras de negócio em funções puras e testadas.** Datas, disponibilidade, valores, cupom, conta da taxa de segurança e validações ficam em `lib/`, separados das telas, com 176 testes. As regras de datas do banco foram comparadas com as do site para todos os dias de um ano.
 - **Testes de ponta a ponta a cada push.** O Playwright abre o site publicado num navegador (computador e celular), aluga um bolo do catálogo até a confirmação e confere os avisos de data ocupada e bolo vendido, com o Supabase simulado. Se algum falhar, o site não é publicado.
 - **Carrinho no navegador.** Fica no `localStorage`, lido com `useSyncExternalStore`, e as abas abertas ficam sincronizadas.
+- **Fotos sem banco de imagens.** Cada bolo tem uma pasta com o código dele em `dados-fonte/fotos/` (os originais, pesados, não vão para o GitHub). `npm run fotos` corrige a orientação da foto do celular, gera duas versões WebP (grande para a página do bolo, pequena para os cartões) e lista tudo em `data/fotos.json`, com uma "versão" por foto para o navegador não mostrar a antiga quando ela é trocada. A página do bolo ganha galeria com miniaturas, e o link compartilhado no WhatsApp mostra a foto do bolo.
 - **Planilha como fonte dos dados.** `npm run importar` lê `dados-fonte/catalogo.xlsx`, aponta erros (código repetido, preço faltando, topo inexistente) e só grava `data/catalogo.json` se estiver tudo certo. A cada push, o GitHub copia os preços para o banco.
 - **Datas sem surpresa de fuso horário:** todas as contas com datas usam UTC e o formato `AAAA-MM-DD`.
 
@@ -98,6 +99,7 @@ Abra http://localhost:3000.
 | `npm run lint` | Confere o código com o ESLint |
 | `npm run build` | Gera o site estático na pasta `out/` |
 | `npm run importar` | Lê a planilha e atualiza o catálogo |
+| `npm run fotos` | Prepara as fotos para o site (WebP leve em `public/fotos/`). Lê de `dados-fonte/fotos/<CÓDIGO>/` ou da pasta em `PASTA_DAS_FOTOS` no `.env` (ex.: OneDrive) |
 | `npm run sincronizar` | Copia os preços para o Supabase (o GitHub faz sozinho a cada push) |
 
 O banco é criado rodando, em ordem, os arquivos de `supabase/` no SQL Editor do Supabase.
@@ -122,7 +124,7 @@ dados-fonte/  planilha preenchida pela loja
 - Confirmação automática do Pix e pagamento com cartão no site (intermediário de pagamento no CNPJ da loja)
 - E-mail próprio e domínio `ateline.com.br`
 - Rascunhos de posts para o Instagram a partir da agenda ("livres neste fim de semana")
-- Fotos dos bolos e kits "pegue e monte"
+- Kits "pegue e monte"
 
 ## Autora
 

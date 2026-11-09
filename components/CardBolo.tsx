@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Check, CircleSlash } from "lucide-react";
 import { BotaoFavorito } from "@/components/BotaoFavorito";
+import { fotoDoCartao } from "@/lib/fotosDosBolos";
 import { formatarPreco } from "@/lib/formatar";
 import type { BoloVitrine } from "@/types/catalogo";
 
@@ -16,6 +17,8 @@ type CardBoloProps = {
 
 export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloProps) {
   const reservado = disponivel === false;
+  // Sem foto passada pela página, usa a foto principal da pasta do bolo (npm run fotos)
+  const capa = foto ?? fotoDoCartao(bolo.codigo, bolo.opcoes.map((opcao) => opcao.codigo));
   const tamanhos =
     bolo.andaresMin === bolo.andaresMax
       ? `${bolo.andaresMin} andares`
@@ -28,8 +31,8 @@ export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloP
           reservado ? "opacity-60 grayscale" : ""
         }`}
       >
-        {foto ? (
-          <Image src={foto} alt={bolo.nome} fill sizes="(min-width: 768px) 25vw, 50vw" className="object-cover" />
+        {capa ? (
+          <Image src={capa} alt={bolo.nome} fill sizes="(min-width: 768px) 25vw, 50vw" className="object-cover" />
         ) : (
           <span className="grid h-full place-items-center text-sm text-ameixa-suave">Foto em breve</span>
         )}

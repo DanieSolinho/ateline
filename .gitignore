@@ -45,3 +45,6 @@ next-env.d.ts
 # relatórios dos testes de ponta a ponta (Playwright)
 /test-results/
 /playwright-report/
+
+# fotos originais dos bolos (pesadas): só as versões leves de public/fotos vão para o GitHub
+/dados-fonte/fotos/
