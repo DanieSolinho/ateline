@@ -6,9 +6,11 @@ Loja online da **Ateline Ateliê** ([@atelineatelie](https://www.instagram.com/a
 
 ![Página inicial](docs/home.png)
 
-| Página do bolo, com calendário de disponibilidade | Catálogo no celular |
+![Página do bolo, com calendário de disponibilidade](docs/bolo.png)
+
+| Catálogo no celular | Pix do sinal, gerado no próprio site |
 | --- | --- |
-| ![Página do bolo](docs/bolo.png) | ![Catálogo no celular](docs/celular.png) |
+| ![Catálogo no celular](docs/celular.png) | ![Pix com QR Code e copia e cola](docs/pix.png) |
 
 > As fotos dos bolos ainda estão sendo produzidas. Bolo sem foto mostra "Foto em breve"; com foto, o site já exibe sozinho (veja `npm run fotos`).
 
@@ -22,13 +24,15 @@ Hoje o atendimento da Ateline é todo pelo WhatsApp: a cliente pergunta se o bol
 - **"Livres na sua data":** tocando num dia ocupado, a cliente vê outros bolos livres naquele dia (mesmo tema primeiro) e já abre o bolo com a data escolhida.
 - **Montar a reserva:** tamanho (número de andares), decoração, topo opcional, base dourada e personalização (nome, idade ou inicial). O topo e a base também têm agenda própria.
 - **Filtro "só livres nessa data"** no catálogo, além de busca por nome, tema e decoração.
+- **Entrega do aluguel combinada pelo WhatsApp:** a loja entrega só em alguns bairros. A cliente reserva e paga o sinal normalmente e, na confirmação, um botão abre o WhatsApp com a reserva, as datas e o endereço para saber se a loja atende e o valor; se não atender, ela retira na loja. No painel, o cartão de saída avisa quem pediu entrega e o bairro.
 - **Compra:** com 50% de sinal, retirada grátis na loja ou envio por transportadora. O CEP preenche o endereço sozinho (ViaCEP), e o orçamento do frete vai pronto para o WhatsApp da loja.
 - **Encomenda:** formulário de orçamento para um bolo novo e a opção de **refazer** um bolo que saiu do acervo, com cupom de desconto e antecedência mínima de 20 dias.
 - **Carrinho e checkout** com aluguel e compra no mesmo pedido, validação de CPF e telefone, aceite do contrato e chave Pix para devolver a taxa de segurança. Depois do pedido, aparece o **Pix da Ateline (QR Code e copia e cola)** já com o valor do sinal e o número do pedido, gerado no próprio site no padrão do Banco Central e pago direto na conta PJ, sem intermediário. O banco confere a agenda e os preços e reserva as peças por 30 minutos, o tempo de pagar o sinal (a loja só garante a data com o sinal pago na hora).
 - **Login com senha ou com link mágico por e-mail** (criar conta, esqueci a senha) e **Minha conta:** próxima retirada, histórico de pedidos com a situação de cada um e dados pessoais e endereço salvos na conta.
 - **Adiar ou cancelar pela conta:** com o sinal pago e até 15 dias antes da festa, a cliente escolhe a nova data num calendário que só mostra os dias livres, e o banco move a reserva na hora. Se cancelar, o sinal vira **crédito em loja** por 3 meses, que pode pagar o sinal de um próximo pedido no checkout (se cobrir o sinal inteiro, o pedido já sai confirmado).
-- **Contrato em PDF:** o contrato de locação sai preenchido com os dados da cliente, as peças, as datas e os valores, e pode ser baixado na confirmação do pedido e em Minha conta. O PDF é gerado no próprio navegador ([jsPDF](https://github.com/parallax/jsPDF)).
+- **Contrato em PDF:** o contrato de locação sai preenchido com os dados da cliente, as peças, as datas, os valores e o valor de reposição de cada bolo (cobrado se a peça não voltar ou voltar sem conserto), além da data, hora e IP do aceite, e pode ser baixado na confirmação do pedido e em Minha conta. O PDF é gerado no próprio navegador ([jsPDF](https://github.com/parallax/jsPDF)).
 - **Favoritos para decidir em família:** a cliente separa até 3 bolos no coração e manda um link pelo WhatsApp; quem abre vê os bolos lado a lado.
+- **Fotos dos bolos:** cada bolo tem uma pasta com o código dele (pode ser no OneDrive); `npm run fotos` gera versões leves, e o site mostra a foto nos cartões, uma galeria com miniaturas na página do bolo e a foto no link compartilhado.
 - **Painel da loja:** agenda do dia (o que sai, o que volta, o que está atrasado), confirmação de pagamento com um clique, checklist de devolução, fotos das peças na saída e na volta (guardadas numa pasta privada do Supabase Storage, com as da saída ao lado na devolução para comparar avarias) e a conta da taxa de segurança (multa por atraso, vela não devolvida, avaria). O painel pode ser **instalado no celular como app** (PWA, só ele: as páginas das clientes continuam um site normal), com uma página amigável quando está sem internet. Como o app instalado no iPhone não recebe o login pelo link do e-mail, a equipe pode criar uma senha no painel e entrar com e-mail e senha.
 - **Relatórios:** faturamento, bolos mais alugados, festas por dia da semana, clientes (novas por mês e as que voltaram) e bolos mais vistos no site, com alerta para os muito vistos e pouco alugados. As visualizações são contadas sem guardar dados de quem viu.
 - **Conteúdo para o Instagram:** o painel monta posts (bolos livres no próximo sábado, destaque, como funciona) com imagem e legenda; a dona revisa, aprova e agenda, e na hora marcada copia a legenda e baixa a imagem para postar.
@@ -65,7 +69,7 @@ flowchart LR
 - **Site estático + Supabase, sem servidor próprio.** As páginas são geradas na hora de publicar (`output: "export"`, uma por bolo com `generateStaticParams`) e já saem com a agenda daquele momento. No navegador, a agenda é buscada de novo no Supabase, então uma reserva feita no painel aparece na hora.
 - **O banco é quem decide.** A trava contra reserva dupla é uma *exclusion constraint* do Postgres (mesma peça + períodos que se cruzam), e o pedido é criado por uma função (`criar_pedido`) que confere a agenda, recalcula os valores com os preços do banco e reserva as peças numa só transação. Reservas sem sinal se soltam sozinhas depois de 30 minutos.
 - **Segurança por pessoa com RLS.** Visitante só lê a agenda pública; cada cliente só vê os próprios dados e pedidos; o painel e as ações da loja só funcionam para quem está na tabela da equipe. A chave secreta do Supabase fica só nos *secrets* do GitHub.
-- **Regras de negócio em funções puras e testadas.** Datas, disponibilidade, valores, cupom, conta da taxa de segurança e validações ficam em `lib/`, separados das telas, com 176 testes. As regras de datas do banco foram comparadas com as do site para todos os dias de um ano.
+- **Regras de negócio em funções puras e testadas.** Datas, disponibilidade, valores, cupom, conta da taxa de segurança e validações ficam em `lib/`, separados das telas, com 190 testes (e mais 10 de ponta a ponta, no computador e no celular). As regras de datas do banco foram comparadas com as do site para todos os dias de um ano.
 - **Testes de ponta a ponta a cada push.** O Playwright abre o site publicado num navegador (computador e celular), aluga um bolo do catálogo até a confirmação e confere os avisos de data ocupada e bolo vendido, com o Supabase simulado. Se algum falhar, o site não é publicado.
 - **Carrinho no navegador.** Fica no `localStorage`, lido com `useSyncExternalStore`, e as abas abertas ficam sincronizadas.
 - **Fotos sem banco de imagens.** Cada bolo tem uma pasta com o código dele em `dados-fonte/fotos/` (os originais, pesados, não vão para o GitHub). `npm run fotos` corrige a orientação da foto do celular, gera duas versões WebP (grande para a página do bolo, pequena para os cartões) e lista tudo em `data/fotos.json`, com uma "versão" por foto para o navegador não mostrar a antiga quando ela é trocada. A página do bolo ganha galeria com miniaturas, e o link compartilhado no WhatsApp mostra a foto do bolo.
@@ -112,11 +116,11 @@ components/   componentes de tela, separados por página
 hooks/        carrinho, login, agenda ao vivo e pedidos
 lib/          regras de negócio e funções testadas
 types/        tipos do catálogo, do carrinho e dos pedidos
-data/         catálogo em JSON (gerado da planilha)
+data/         catálogo e lista de fotos em JSON (gerados pelos scripts)
 supabase/     tabelas, funções e regras de segurança do banco (SQL)
-scripts/      importador da planilha e sincronização de preços
+scripts/      importador da planilha, preparo das fotos e sincronização de preços
 e2e/          testes de ponta a ponta (Playwright)
-dados-fonte/  planilha preenchida pela loja
+dados-fonte/  planilhas preenchidas pela loja
 ```
 
 ## Próximos passos

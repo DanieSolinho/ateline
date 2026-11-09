@@ -122,7 +122,7 @@ export function Confirmacao() {
             href={linkEntrega}
             target="_blank"
             rel="noopener"
-            className="flex h-12 items-center gap-2 rounded-xl bg-folha px-5 font-bold text-white hover:opacity-90"
+            className="flex min-h-12 items-center gap-2 rounded-xl bg-folha px-5 py-2 font-bold leading-tight text-white hover:opacity-90"
           >
             <MessageCircle size={20} aria-hidden /> Combinar a entrega no WhatsApp
           </a>
@@ -140,7 +140,7 @@ export function Confirmacao() {
             href={linkFrete}
             target="_blank"
             rel="noopener"
-            className="flex h-12 items-center gap-2 rounded-xl bg-folha px-5 font-bold text-white hover:opacity-90"
+            className="flex min-h-12 items-center gap-2 rounded-xl bg-folha px-5 py-2 font-bold leading-tight text-white hover:opacity-90"
           >
             <MessageCircle size={20} aria-hidden /> Pedir orçamento do frete
           </a>

@@ -47,7 +47,7 @@ export function Hero() {
         </div>
 
         {/* Espaço das fotos: troque pelas fotos reais quando chegarem */}
-        <div className="grid grid-cols-2 gap-4" aria-hidden="true">
+        <div className="hidden grid-cols-2 gap-4 md:grid" aria-hidden="true">
           <div className="row-span-2 min-h-96 rounded-3xl bg-rosa" />
           <div className="min-h-44 rounded-3xl bg-pessego" />
           <div className="min-h-44 rounded-3xl bg-blush ring-1 ring-linha" />

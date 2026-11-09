@@ -6,6 +6,7 @@ import { useCarrinho } from "@/hooks/useCarrinho";
 import { diaPorExtenso, primeiraMaiuscula } from "@/lib/calendario";
 import { chaveDoItem, resumoDoCarrinho, totalDoItem } from "@/lib/carrinho";
 import { formatarPreco } from "@/lib/formatar";
+import { fotoDoCartao } from "@/lib/fotosDosBolos";
 import { calcularPeriodo } from "@/lib/periodo";
 import type { ItemCarrinho } from "@/types/carrinho";
 
@@ -50,7 +51,12 @@ export function Carrinho() {
       <ul className="flex flex-col gap-4">
         {itens.map((item) => (
           <li key={chaveDoItem(item)} className="flex gap-4 rounded-2xl border border-linha p-4">
-            <div aria-hidden="true" className="h-28 w-22 shrink-0 rounded-xl bg-rosa" />
+            <div aria-hidden="true" className="relative h-20 w-16 shrink-0 overflow-hidden rounded-xl bg-rosa sm:h-28 sm:w-22">
+              {fotoDoCartao(item.codigoBolo) && (
+                // eslint-disable-next-line @next/next/no-img-element -- miniatura decorativa, já otimizada pelo npm run fotos
+                <img src={fotoDoCartao(item.codigoBolo)} alt="" className="size-full object-cover" />
+              )}
+            </div>
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <span className="self-start rounded-full bg-blush px-2.5 py-0.5 text-xs font-bold">
                 {item.tipo === "aluguel" ? "Aluguel" : "Compra"}
@@ -62,9 +68,10 @@ export function Carrinho() {
                 {item.nome}
               </Link>
               <DetalhesDoItem item={item} />
+              <span className="mt-1 font-bold sm:hidden">{formatarPreco(totalDoItem(item))}</span>
             </div>
             <div className="flex flex-col items-end justify-between">
-              <span className="font-bold">{formatarPreco(totalDoItem(item))}</span>
+              <span className="hidden font-bold sm:inline">{formatarPreco(totalDoItem(item))}</span>
               <button
                 type="button"
                 onClick={() => remover(chaveDoItem(item))}
@@ -82,18 +89,18 @@ export function Carrinho() {
         <h2 className="font-display text-xl font-semibold">Resumo</h2>
         {resumo.temAluguel && (
           <>
-            <p className="flex justify-between">
+            <p className="flex justify-between gap-3">
               <span>Locação</span>
               <span>{formatarPreco(resumo.locacao)}</span>
             </p>
-            <p className="flex justify-between">
+            <p className="flex justify-between gap-3">
               <span>Taxa de segurança (devolvida)</span>
               <span>{formatarPreco(resumo.taxas)}</span>
             </p>
           </>
         )}
         {resumo.temCompra && (
-          <p className="flex justify-between">
+          <p className="flex justify-between gap-3">
             <span>Compra</span>
             <span>{formatarPreco(resumo.compras)}</span>
           </p>

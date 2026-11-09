@@ -385,7 +385,7 @@ export function MontarReserva({ bolo, topos, bases, reservas: daPublicacao, outr
             </p>
             {erro && <p role="alert" className="font-semibold text-alerta">{erro}</p>}
             <button type="button" onClick={reservar}
-              className="mt-2 h-14 rounded-xl bg-framboesa text-lg font-bold text-white hover:bg-framboesa-escura">
+              className="mt-2 min-h-14 rounded-xl bg-framboesa px-4 py-2 text-lg font-bold leading-tight text-balance text-white hover:bg-framboesa-escura">
               Reservar e pagar sinal de {formatarPreco(sinal)}
             </button>
           </section>

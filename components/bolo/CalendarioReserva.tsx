@@ -51,8 +51,8 @@ export function CalendarioReserva({ codigo, reservas, festa, aoEscolher, ocupada
 
   return (
     <section aria-labelledby="titulo-calendario" className="flex flex-col gap-4 rounded-2xl border border-linha p-5">
-      <div className="flex items-center justify-between gap-2">
-        <h2 id="titulo-calendario" className="font-display text-lg font-semibold">
+      <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+        <h2 id="titulo-calendario" className="whitespace-nowrap font-display text-lg font-semibold">
           Dia da festa
         </h2>
         <div className="flex items-center gap-1">

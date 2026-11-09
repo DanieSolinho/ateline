@@ -22,7 +22,7 @@ export function Footer() {
           </p>
           <a
             href="https://www.instagram.com/atelineatelie"
-            className="text-sm font-bold text-framboesa hover:underline"
+            className="self-start py-1.5 text-sm font-bold text-framboesa hover:underline"
           >
             @atelineatelie
           </a>
@@ -35,10 +35,10 @@ export function Footer() {
           <p className="text-ameixa-suave">Fechado domingo e segunda</p>
         </div>
 
-        <nav aria-label="Ajuda" className="flex flex-col gap-1 text-sm">
+        <nav aria-label="Ajuda" className="flex flex-col items-start text-sm">
           <h2 className="mb-1 font-display text-base font-semibold">Ajuda</h2>
           {ajuda.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-framboesa">
+            <Link key={link.href} href={link.href} className="py-1.5 hover:text-framboesa">
               {link.label}
             </Link>
           ))}

@@ -121,7 +121,7 @@ export function FormularioEntrar() {
             setEmailEnviado(null);
             mudarModo("senha");
           }}
-          className="font-bold text-framboesa underline"
+          className="inline-flex min-h-11 items-center font-bold text-framboesa underline"
         >
           Voltar
         </button>
@@ -217,22 +217,22 @@ export function FormularioEntrar() {
         </button>
       </form>
 
-      <div className="flex flex-col items-start gap-2 text-sm">
+      <div className="flex flex-col items-start gap-0 text-sm">
         {modo === "senha" && (
           <>
-            <button type="button" onClick={() => mudarModo("esqueci")} className="font-bold text-framboesa underline">
+            <button type="button" onClick={() => mudarModo("esqueci")} className="inline-flex min-h-11 items-center font-bold text-framboesa underline">
               Esqueci minha senha
             </button>
             <p>
               Ainda não tem conta?{" "}
-              <button type="button" onClick={() => mudarModo("criar")} className="font-bold text-framboesa underline">
+              <button type="button" onClick={() => mudarModo("criar")} className="inline-flex min-h-11 items-center font-bold text-framboesa underline">
                 Criar conta com senha
               </button>
             </p>
           </>
         )}
         {(modo === "criar" || modo === "esqueci") && (
-          <button type="button" onClick={() => mudarModo("senha")} className="font-bold text-framboesa underline">
+          <button type="button" onClick={() => mudarModo("senha")} className="inline-flex min-h-11 items-center font-bold text-framboesa underline">
             Já tenho senha: entrar
           </button>
         )}

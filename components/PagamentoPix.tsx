@@ -52,7 +52,7 @@ export function PagamentoPix({ numero, valor, guardadoAte }: Props) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <div className="flex flex-wrap items-start gap-5">
+      <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
         {qr ? (
           <div
             role="img"
@@ -65,7 +65,7 @@ export function PagamentoPix({ numero, valor, guardadoAte }: Props) {
             Gerando QR Code…
           </div>
         )}
-        <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm">
+        <div className="flex w-full min-w-0 flex-1 flex-col gap-2 text-sm">
           <dl className="flex flex-col gap-1">
             <div>
               <dt className="inline text-ameixa-suave">Valor: </dt>
