@@ -43,10 +43,12 @@ export async function getBoloDaVitrine(codigo: string): Promise<BoloVitrine | un
   return (await getVitrine()).find((bolo) => bolo.codigo === codigo);
 }
 
-// Os bolos marcados como destaque na planilha (até 4). Sem nenhum marcado, os 4 primeiros.
+// Os bolos marcados como destaque na planilha vêm primeiro (até 4). Se forem menos de 4,
+// a vitrine completa com os próximos bolos, para a página inicial não ficar com buraco.
 export function escolherDestaques(vitrine: BoloVitrine[], maximo = 4): BoloVitrine[] {
   const marcados = vitrine.filter((bolo) => bolo.destaque);
-  return (marcados.length > 0 ? marcados : vitrine).slice(0, maximo);
+  const outros = vitrine.filter((bolo) => !bolo.destaque);
+  return [...marcados, ...outros].slice(0, maximo);
 }
 
 export async function getDestaques(): Promise<BoloVitrine[]> {

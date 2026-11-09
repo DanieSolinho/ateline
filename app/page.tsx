@@ -49,7 +49,7 @@ export default async function Home() {
             Ver todos os bolos →
           </Link>
         </div>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-4">
           {destaques.map((bolo) => (
             <CardBolo key={bolo.codigo} bolo={bolo} />
           ))}

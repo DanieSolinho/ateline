@@ -150,7 +150,7 @@ export function Favoritos({ bolos }: Props) {
 // Os bolos lado a lado (2 no celular, 3 no computador)
 function Grade({ bolos }: { bolos: BoloVitrine[] }) {
   return (
-    <div className="grid grid-cols-2 gap-x-5 gap-y-10 md:grid-cols-3">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-5 md:grid-cols-3">
       {bolos.map((bolo) => (
         <CardBolo key={bolo.codigo} bolo={bolo} />
       ))}

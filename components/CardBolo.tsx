@@ -22,7 +22,7 @@ export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloP
       : `${bolo.andaresMin} a ${bolo.andaresMax} andares`;
 
   return (
-    <article className="flex flex-col gap-3">
+    <article className="flex h-full flex-col gap-3">
       <div
         className={`relative aspect-[4/5] overflow-hidden rounded-2xl bg-rosa ${
           reservado ? "opacity-60 grayscale" : ""
@@ -33,7 +33,9 @@ export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloP
         ) : (
           <span className="grid h-full place-items-center text-sm text-ameixa-suave">Foto em breve</span>
         )}
-        <span className="absolute left-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold">{bolo.tema}</span>
+        <span className="absolute bottom-3 left-3 max-w-[calc(100%-1.5rem)] truncate rounded-full bg-white px-3 py-1 text-xs font-bold">
+          {bolo.tema}
+        </span>
         <BotaoFavorito codigo={bolo.codigo} nome={bolo.nome} />
       </div>
 
@@ -45,12 +47,12 @@ export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloP
         </p>
 
         <dl className={`mt-1 flex gap-0.5 ${modo === "compra" ? "flex-col-reverse" : "flex-col"}`}>
-          <div className="flex items-baseline justify-between gap-2">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2">
             <dt className="text-sm text-ameixa-suave">Aluguel a partir de</dt>
             <dd className="font-bold">{formatarPreco(bolo.menorPrecoLocacao)}</dd>
           </div>
           {bolo.menorPrecoVenda !== null && (
-            <div className="flex items-baseline justify-between gap-2">
+            <div className="flex flex-wrap items-baseline justify-between gap-x-2">
               <dt className="text-sm text-ameixa-suave">Compra a partir de</dt>
               <dd className="font-bold">{formatarPreco(bolo.menorPrecoVenda)}</dd>
             </div>
@@ -72,14 +74,14 @@ export function CardBolo({ bolo, foto, disponivel, modo = "aluguel" }: CardBoloP
       {modo === "compra" ? (
         <Link
           href={`/bolo/${bolo.codigo}#comprar`}
-          className="grid h-12 place-items-center rounded-xl bg-framboesa font-bold text-white hover:bg-framboesa-escura"
+          className="mt-auto grid min-h-12 place-items-center text-balance rounded-xl bg-framboesa px-3 py-2 text-center text-sm font-bold leading-tight text-white hover:bg-framboesa-escura sm:text-base"
         >
           Ver e comprar
         </Link>
       ) : (
         <Link
           href={`/bolo/${bolo.codigo}`}
-          className={`grid h-12 place-items-center rounded-xl font-bold ${
+          className={`mt-auto grid min-h-12 place-items-center text-balance rounded-xl px-3 py-2 text-center text-sm font-bold leading-tight sm:text-base ${
             reservado
               ? "border-2 border-ameixa bg-white text-ameixa"
               : "bg-framboesa text-white hover:bg-framboesa-escura"

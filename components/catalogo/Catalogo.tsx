@@ -109,7 +109,7 @@ export function Catalogo({ bolos: todos, reservas: daPublicacao, vendidos: vendi
 
       <h2 className="sr-only">Bolos</h2>
       {filtrados.length > 0 ? (
-        <div className="grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 md:grid-cols-3 lg:grid-cols-4">
           {filtrados.map((bolo) => (
             <CardBolo
               key={bolo.codigo}

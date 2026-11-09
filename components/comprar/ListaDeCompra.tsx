@@ -26,7 +26,7 @@ export function ListaDeCompra({ bolos, vendidos: daPublicacao }: { bolos: BoloVi
   }
 
   return (
-    <ul className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+    <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-6 md:grid-cols-3 lg:grid-cols-4">
       {aVenda.map((bolo) => (
         <li key={bolo.codigo}>
           <CardBolo bolo={bolo} modo="compra" />
